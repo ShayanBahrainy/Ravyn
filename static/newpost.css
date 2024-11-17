@@ -1,0 +1,30 @@
+@import url("/static/base.css");
+.Body { 
+    background-color: var(--BackgroundColor);
+}
+.SmallText {
+    color: var();
+    size: 12em;
+}
+.LargeText {
+    color: var(--TextColor);
+    size: 64em;
+}
+.Header {
+    position: fixed;
+    top: 5%;
+    left: 45%;
+}
+.Form {
+    position: fixed;
+    left: 40%;
+    top: 20%;
+    background-color: var(--SideColor);
+}
+.Title {
+    position: relative;
+    left: 5%;
+}
+.hidden {
+    display: none;
+}

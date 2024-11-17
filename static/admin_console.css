@@ -1,0 +1,17 @@
+@import url("/static/base.css");
+body {
+    background-color: var(--BackgroundColor);
+}
+.SmallText {
+    color: var(--TextColor);
+    size: 12em;
+}
+.LargeText {
+    color: var(--MainColor);
+    size: 64em;
+}
+.Header {
+    position: absolute;
+    top: 5%;
+    left: 45%;
+}

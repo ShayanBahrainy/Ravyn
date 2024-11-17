@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="/static/index.css">
+        <script src="/static/index.js"></script>
+    </head>
+    <body class="Body">
+        {% if username %}
+        <img src="/static/icons/newpost.png" class="NewPost" id="NewPost">
+        <p class="WelcomeMessage LargeText">Welcome {{username.capitalize()}}.</p>
+        <img src="{{picture}}" class="ProfileImage">
+        {%endif%}
+        {%if not username%}
+        <p class="SmallText">You are not logged in.</p>
+        <a href="/login">Login with Google.</a>
+        {%endif%}
+        <hr class="TopBarDivider">
+        {% if feed%}
+        <div class="Feed">
+        {% for post in feed%}
+            <div class="Post" onclick="location='/Papers/{{post.id}}'">
+                <p class="Title">{{post.name.capitalize()}}</p>
+                <p class="Author">{{post.author.capitalize()}}</p>
+                <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile">
+            </div>
+        {%endfor%}
+        </div>
+        {%endif%}
+    </body>
+</html>

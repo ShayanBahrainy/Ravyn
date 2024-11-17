@@ -1,0 +1,85 @@
+@import url("/static/base.css");
+.ProfileImage {
+    position: fixed;
+    left: 94%;
+    top: 5%;
+    border-radius: 5%;
+    border-style: solid;
+    border-width: 2px;
+    border-color: var(--MainColor);
+    width: 2.5%;
+}
+.Body { 
+    background-color: var(--BackgroundColor);
+}
+.WelcomeMessage {
+    position: fixed;
+    top: 5%;
+    left: 45%;
+}
+.SmallText {
+    color: var(--TextColor);
+    size: 12em;
+}
+.LargeText {
+    color: var(--SideColor);
+    size: 64em;
+}
+.NewPost {
+    position: fixed;
+    left: 1%;
+    top: 5%;
+    width: 2.5%;
+}
+.TopBarDivider {
+    color: var(--MainColor);
+    border-width: 2px;
+    border-style: solid;
+    position: fixed;
+    top: 10%;
+    width: 100%;
+}
+.Feed {
+    position: relative;
+    top: 15%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5% 5%;
+}
+.Post {
+    border-style: solid;
+    background-color: var(--SideColor);
+    color: var(--LightTextColor);
+    border-color: var(--MainColor);
+    padding: .5%;
+    border-radius: 5%;
+    min-width: 10%;
+}
+.Post:hover {
+    background-color: var(--LightSideColor);
+    border-radius: 7%;
+}
+.Title {
+    position: relative;
+    top: 10%;
+}
+.AuthorData {
+    position: relative;
+    left: 5%;
+}
+.Author {
+    position: relative;
+    left: 50%;
+    top: 20%;
+}
+.AuthorProfile {
+    height: 15%;
+    position: relative;
+    left: 25%;
+    top: 0%;
+    border-style: solid;
+    border-width: 2px;
+    border-color: var(--MainColor);
+    border-radius: 35%;
+}

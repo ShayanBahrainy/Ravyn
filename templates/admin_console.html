@@ -1,0 +1,17 @@
+<html>
+    <head>
+
+    </head>
+    <body>
+        <h1 class="Header">Moderate!</h1>
+        {% if reports%}
+        {% for report in reports %}
+        <p>{{report.post.name}}</p>
+        <p>Reported {{report.reportquantity}} times!</p>
+        {% endfor %}
+        {% endif %}
+        {% if not reports %}
+        <p class="LargeText">No Reports! Good Job!</p>
+        {% endif%}
+    </body>
+</html>

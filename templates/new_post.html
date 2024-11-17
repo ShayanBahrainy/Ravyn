@@ -1,0 +1,21 @@
+<html>
+    <head> 
+        <link rel="stylesheet" href="/static/newpost.css">
+        <script src="/static/newpost.js"></script>
+    </head>
+    <body class="Body">
+        {%if failReason%}
+        <p class="LargeText Header">Publish Failed: {{failReason}}</p>
+        {%else%}
+        <p class="LargeText Header">Write a post!</p>
+        {%endif%}
+        <form enctype="multipart/form-data" method="post" class="Form">
+            <p class="Title">Title</p>
+            <input type="text" name="Title" class="TitleField">
+            <p class="Paper">Paper</p>
+            <input type="file" name="PaperBody" id="UploadButton" class="hidden" accept="application/pdf">
+            <label for="UploadButton" class="Publish">Upload</label>
+            <button type="submit" id="Publish">Publish</button>
+        </form>
+    </body>
+</html>

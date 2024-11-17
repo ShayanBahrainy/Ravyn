@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="/static/paper_view.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+        <script src="/static/paper_view.js"></script>
+        <script>window.addEventListener("load", function (){
+            window.loadPDF("{{source}}")
+        })</script>
+        <div id="PostID" data-id="{{paperid}}"></div>
+    </head>
+    <body>
+        <p class="Header Largetext">{{title}}</p>
+
+          <div id="pdf-container"></div>
+
+          <div id="page-controls" class="controlsBar">
+        
+            <button id="prev-page" class="controlsButton"><img alt="Previous" src="/static/icons/backward.png" class="backwardIcon"></button>
+        
+            <span id="page-num" class="numPage"></span>
+        
+            <button id="next-page" class="controlsButton"><img alt="Next" src="/static/icons/forward.png" class="forwardIcon"></button>
+        
+            <input type="number" id="go-to-page-input" placeholder="Go to Page" class="pageInput">
+        
+            <button id="go-to-page-btn" class="controlsButton">Go</button>
+        
+            <button id="zoom-out" class="controlsButton"> <img alt="Zoom Out" src="/static/icons/zoom_out.png" class="zoomOutIcon"></button>
+        
+            <button id="zoom-in" class="controlsButton"> <img alt="Zoom In" src="/static/icons/zoom_in.png" class="zoomInIcon"></button>
+            
+            <select title="Extra Options" id="menu" class="controlsButton menuOptions">
+            <option value="" disabled selected>...</option>
+            <option class="MenuOption" value="report">Report!</option>
+            </select> 
+
+
+         
+         </div>
+    </body>
+</html>
