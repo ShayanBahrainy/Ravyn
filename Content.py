@@ -145,7 +145,7 @@ class ReportManager:
             offset = math.floor(random.random() * count) 
             if count < ReportManager.MAX_FEED_LENGTH:
                 offset = 0
-            r = connection.execute("SELECT POSTID, USERID FROM Reports LIMIT ? OFFSET ?;",(ContentManager.MAX_FEED_LENGTH, offset))
+            r = connection.execute("SELECT POSTID, USERID FROM Reports GROUP BY POSTID LIMIT ? OFFSET ?;",(ContentManager.MAX_FEED_LENGTH, offset))
             reports = r.fetchall()
             for report in reports:
                 post = self.contentmanager.get_post(report[0])

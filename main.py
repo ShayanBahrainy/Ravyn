@@ -143,5 +143,7 @@ def privacypolicy():
 @app.route("/tos")
 def tos():
     return tos
-
+@app.errorhandler(requests.exceptions.ConnectionError)
+def backend_connection_error():
+    return 
 app.run(port=443,ssl_context="adhoc", debug=False)

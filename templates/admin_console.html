@@ -1,14 +1,26 @@
 <html>
     <head>
-
+        <link href="/static/admin_console.css" rel="stylesheet">
     </head>
     <body>
         <h1 class="Header">Moderate!</h1>
         {% if reports%}
-        {% for report in reports %}
-        <p>{{report.post.name}}</p>
-        <p>Reported {{report.reportquantity}} times!</p>
-        {% endfor %}
+        <table class="ReportsContainer">
+            <tr>
+                <th>Title</th>
+                <th>Reports</th>
+                <th>Save</th>
+                <th>Delete</th>
+            </tr>
+            {% for report in reports %}
+            <tr>
+                <td>{{report.post.name}}</td>
+                <td>{{report.reportquantity}}</td>
+                <td><img class="SaveButton" src="/static/icons/check mark.png"></td>
+                <td><img class="DeleteButton" src="/static/icons/delete.png"></td>
+            </tr>
+            {% endfor %}
+        </table>
         {% endif %}
         {% if not reports %}
         <p class="LargeText">No Reports! Good Job!</p>

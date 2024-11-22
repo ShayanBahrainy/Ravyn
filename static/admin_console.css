@@ -15,3 +15,18 @@ body {
     top: 5%;
     left: 45%;
 }
+.ReportsContainer {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--SideColor);
+    position: fixed;
+    left: 35%;
+    top: 25%;
+    width: 32.5%;
+    padding: 5%;
+    border-radius: 10%;
+    color: var(--MainColor);
+}
+.Report {
+    color: var(--MainColor);
+}
