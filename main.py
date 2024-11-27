@@ -46,25 +46,45 @@ def newPostPage():
     if request.method == "GET":
         return render_template("new_post.html")
     if request.method == "POST":
-        if not request.files.__contains__("PaperBody"):
-            return redirect("new_post.html",failReason="No body attached!")
+        if not request.form.__contains__("Body"):
+            return redirect("new_post.html",failReason="No body!")
         if not request.form.__contains__("Title"):
             return render_template("new_post.html",failReason="No title!")
-        r = contentmanager.create_post(request.form["Title"], request.files["PaperBody"], user.id)
+        r = contentmanager.create_post(request.form["Title"], request.form["Body"], user.id)
         if type(r) != str:
             return redirect("/")
         return render_template("new_post.html", failReason=r)
-@app.route("/report/<PaperID>", methods=["POST"])
-def report(PaperID):
+@app.route("/report/<PostID>", methods=["POST"])
+def report(PostID):
     if not request.cookies.__contains__("AUTH"):
         return redirect("/")
     user = accounts.is_logged_in(request.cookies["AUTH"])
     if not user:
         return abort(403)
-    post = contentmanager.get_post(PaperID)
+    post = contentmanager.get_post(PostID)
     if not post:
         return abort(404)
     return str(reportmanager.make_report(post, user))
+@app.route("/report/clear/<PostID>",methods=["POST"])
+def clear_report(PostID):
+    if not request.cookies.__contains__("AUTH"):
+        return abort(403)
+    user = accounts.is_logged_in(request.cookies["AUTH"])
+    if not user or not user.admin:
+        return abort(403)
+    reportmanager.clear_reports(PostID)
+    return 'True'
+
+@app.route("/report/delete/<PostID>", methods=["POST"])
+def delete_because_report(PostID):
+    if not request.cookies.__contains__("AUTH"):
+        return abort(403)
+    user = accounts.is_logged_in(request.cookies["AUTH"])
+    if not user or not user.admin:
+        return abort(403)
+    reportmanager.takedown_post(PostID)
+    return 'True'
+
 @app.route("/admin/console/")
 def admin_console():
     if not request.cookies.__contains__("AUTH"):
@@ -73,19 +93,14 @@ def admin_console():
     if not user or not user.admin:
         return redirect("/")
     return render_template("admin_console.html", reports=reportmanager.get_feed())
-@app.route("/Papers/<PaperID>")
-def LoadPaper(PaperID):
-    title = contentmanager.get_title(PaperID)
-    if not title:
+
+@app.route("/post/<PostID>")
+def LoadPaper(PostID):
+    post = contentmanager.get_post(PostID)
+    if not post:
         return "Not Found!"
     
-    return render_template("paper_view.html", source="/Papers/{}/Source".format(PaperID), title=title, paperid=PaperID)
-
-@app.route("/Papers/<PaperID>/Source")
-def LoadSource(PaperID):
-    if not contentmanager.validate_post_for_showing(PaperID):
-        return "Not Found!"
-    return send_from_directory("Papers","{}.pdf".format(PaperID))
+    return render_template("post_view.html", post=post, PostID=PostID)
 
 @app.route("/login/")
 def login():

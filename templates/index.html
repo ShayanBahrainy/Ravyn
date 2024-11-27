@@ -17,7 +17,7 @@
         {% if feed%}
         <div class="Feed">
         {% for post in feed%}
-            <div class="Post" onclick="location='/Papers/{{post.id}}'">
+            <div class="Post" onclick="location='/post/{{post.id}}'">
                 <p class="Title">{{post.name.capitalize()}}</p>
                 <p class="Author">{{post.author.capitalize()}}</p>
                 <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile">

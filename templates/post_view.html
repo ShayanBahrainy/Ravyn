@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="/static/post_view.css">
+        <script src="/static/post_view.js"></script>
+        <div id="PostID" data-id="{{post.id}}"></div>
+    </head>
+    <body>
+        <p class="Header Largetext">{{post.name}}</p>
+
+        <select title="Extra Options" id="menu" class="controlsButton menuOptions">
+        <option value="" class="MenuOption" disabled selected>...</option>
+        <option class="MenuOption" value="report">Report</option>
+        </select> 
+        <button id="backButton" class="backButton LargeText">←</button>
+        <p class="Content SmallText"> {{post.content}}</p>
+        <div class="CreateComment">
+        <input type="text" class="NewComment" placeholder="Comment" id="NewComment">
+        <button class="SubmitComment" id="SubmitComment" >Comment</button>
+        </div>
+    </body>
+</html>

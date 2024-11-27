@@ -1,6 +1,7 @@
 <html>
     <head>
         <link href="/static/admin_console.css" rel="stylesheet">
+        <script src="/static/admin_console.js"></script>
     </head>
     <body>
         <h1 class="Header">Moderate!</h1>
@@ -16,8 +17,8 @@
             <tr>
                 <td>{{report.post.name}}</td>
                 <td>{{report.reportquantity}}</td>
-                <td><img class="SaveButton" src="/static/icons/check mark.png"></td>
-                <td><img class="DeleteButton" src="/static/icons/delete.png"></td>
+                <td><button  class="ActionButton" onclick="freePost('{{ report.post.id }}','{{ report.post.name }}')">✅</button></td>
+                <td><button  class="ActionButton" onclick="deletePost('{{ report.post.id }}', '{{ report.post.name }}')">❌</button></td>
             </tr>
             {% endfor %}
         </table>

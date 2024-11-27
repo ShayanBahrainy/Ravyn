@@ -30,3 +30,7 @@ body {
 .Report {
     color: var(--MainColor);
 }
+.ActionButton {
+    background-color: transparent;
+    border: none;
+}

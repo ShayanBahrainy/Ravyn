@@ -1,0 +1,71 @@
+@import url("/static/base.css");
+body {
+    background-color: var(--BackgroundColor);
+}
+.SmallText {
+    color: var(--TextColor);
+    font-size: 1.5em;
+}
+.LargeText {
+    color: var(--SideColor);
+    font-size: 3em;
+}
+.Header {
+    position: absolute;
+    top: 5%;
+    left: 15%;
+}
+.Content {
+    position: relative;
+    left: 30%;
+    top: 10%;
+    text-overflow: break-word;
+    width: 40%;
+}
+.controlsButton {
+    background-color: var(--SideColor);
+    color: var(--MainColor);
+    position: relative;
+    left: 80%;
+    border: none;
+    width: 8%;
+    height: 4%;
+    display: inline-block;
+}
+.backButton {
+    display: inline-block;
+    position: relative;
+    left: 5%;
+    top: 0%;
+    border: none;
+    width: 8%;
+    height: 4%;
+    background: none;
+}
+.controlsButton:focus {
+    outline: none;
+}
+.MenuOption {
+    color: var(--SideColor);
+}
+.CreateComment {
+    position: relative;
+    top: 15%;
+    left: 40%;
+}
+.NewComment {
+    border: none;
+    background-color: var(--SideColor);
+    color: var(--MainColor);
+}
+.SubmitComment {
+    border: none;
+    background-color: var(--SideColor);
+    color: var(--MainColor);
+}
+.SubmitComment:active {
+    background-color: var(--LightSideColor);
+}
+.NewComment:active {
+    background-color: var(--LightSideColor);
+}
