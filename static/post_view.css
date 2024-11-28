@@ -51,21 +51,36 @@ body {
 .CreateComment {
     position: relative;
     top: 15%;
-    left: 40%;
+    left: 30%;
 }
 .NewComment {
     border: none;
-    background-color: var(--SideColor);
+    background: none;
     color: var(--MainColor);
+    padding: 2rem;
+    height: 5%;
+    display: inline-block;
+    width: 400px;
+    height: 100px;
 }
 .SubmitComment {
-    border: none;
+    border-style: none;
+    border-radius: 7.5%;
     background-color: var(--SideColor);
     color: var(--MainColor);
+    height: 5%;
+    width: 10%;
+    position: relative;
+    top: -30px; /* Move the button upwards */
+    vertical-align: middle;
+    display: inline-block;
 }
 .SubmitComment:active {
     background-color: var(--LightSideColor);
 }
-.NewComment:active {
-    background-color: var(--LightSideColor);
+.NewComment:focus {
+    outline: none;
+}
+.NewComment,.NewComment::placeholder {
+    font: 1.5rem/3 sans-serif;
 }

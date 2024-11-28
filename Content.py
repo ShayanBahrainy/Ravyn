@@ -77,8 +77,6 @@ class ContentManager:
         public_face = self.accounts.get_public_face(r[2])
         return Post(r[0], r[1], public_face[0], public_face[1], r[3])
     def create_post(self, title: str, body: str, user_id: int) -> str | bool:
-        #Check if PDF is safe to save.
-
         if len(body) < ContentManager.MIN_BODY_LENGTH:
             return "Body too short"
         if len(title) < ContentManager.MIN_TITLE_LENGTH:
@@ -94,6 +92,19 @@ class ContentManager:
     def delete_post(self, id: str):
         with self.make_connection() as connection:
             connection.execute("DELETE FROM Posts WHERE ID=?;",(id,))
+class CommentManager:
+    MinimumCommentLength = 10
+    def __init__(self, db: str):
+        self.db = db
+        with self.make_connection() as connection:
+            connection.execute("pragma journal_mode=wal;")
+            connection.execute("CREATE TABLE IF NOT EXISTS Comments (PostID TEXT, CommentID TEXT, OWNER INTEGER, BODY TEXT);")
+    def make_comment(Post: Post, Owner: User, Text: str) -> bool | str:
+        if len(Text) < CommentManager.MinimumCommentLength:
+            return "Comment is too short."
+        
+    def make_connection(self):
+        return sqlite3.connect(self.db)
 class ReportManager:
     MAX_FEED_LENGTH = 25
     def __init__(self, db: str, contentmanager: ContentManager):

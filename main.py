@@ -84,7 +84,15 @@ def delete_because_report(PostID):
         return abort(403)
     reportmanager.takedown_post(PostID)
     return 'True'
-
+@app.route("/comment/<PostID>",methods=["POST"])
+def comment_index(PostID):
+    if not request.cookies.__contains__("AUTH"):
+        return abort(403)
+    user = accounts.is_logged_in(request.cookies["AUTH"])
+    if not user:
+        return abort(403)
+    assert request.content_type == "application/json", "Incorrect Content Type"
+    return contentmanager.add_comment(PostID, request.json)
 @app.route("/admin/console/")
 def admin_console():
     if not request.cookies.__contains__("AUTH"):
