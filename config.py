@@ -11,8 +11,8 @@ user = 'opc'          # the user gunicorn will run on
 
 daemon = False          # this is only to tell gunicorn to deamonize the server process
 
-errorlog = '/var/log/gunicorn/error-ravyn.log'    # error log
+errorlog = 'gunicorn/error-ravyn.log'    # error log
 
-accesslog = '/var/log/gunicorn/access-ravyn.log'  # access log
+accesslog = 'gunicorn/access-ravyn.log'  # access log
 
 proc_name = 'gunicorn-ravyn'            # the gunicorn process name
