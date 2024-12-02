@@ -3,6 +3,7 @@
         <link rel="stylesheet" href="/static/index.css">
         <script src="/static/index.js"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="/static/icons/favicon.ico">
     </head>
     <body class="Body">
         {% if username %}
@@ -17,7 +18,7 @@
         {%endif%}
         {%if not username%}
         <p class="WelcomeMessage LargeText">Welcome Stranger!</p>
-        <p class="SmallText NotLoggedIn">You are not logged in.</p>
+        <img class="NotLoggedIn" src="/static/icons/favicon.ico">
         <button onclick="location='/login'" class="LoginButton">Get in!</button>
         {%endif%}
         <hr class="TopBarDivider">

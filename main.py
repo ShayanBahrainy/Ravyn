@@ -13,11 +13,11 @@ GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
-
+BETA_ACCOUNTS = "BETA_ACCOUNTS.txt"
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
-accounts = Accounts("Accounts.db", "admin.txt")
+accounts = Accounts("Accounts.db", "admin.txt", BETA_ACCOUNTS)
 contentmanager = ContentManager("Posts.db", accounts)
 commentmanager = CommentManager("Posts.db", contentmanager)
 reportmanager = ReportManager("Reports.db", contentmanager, commentmanager)
@@ -160,6 +160,8 @@ def googleauth():
         picture = userinfo_response.json()["picture"]
         users_name = userinfo_response.json()["given_name"]
         cookie = accounts.login(unique_id, users_name, users_email, picture)
+        if not cookie:
+            return "User is not in beta test!", 403
         r = make_response(redirect("/"))
         r.set_cookie("AUTH", cookie)
         return r

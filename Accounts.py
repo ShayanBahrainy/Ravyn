@@ -18,7 +18,8 @@ class UserPublicFace:
         self.name = name
         self.profileimage = profileimage
 class Accounts:
-    def __init__(self, db: str, admin_file: str):
+    def __init__(self, db: str, admin_file: str, beta_users: os.PathLike=None):
+        "IF beta_users is passed, beta user emails will be loaded from text file and no one else can sign in."
         self.db = db
         with self.make_connection() as connection:
             connection.execute("pragma journal_mode=wal;")
@@ -27,6 +28,9 @@ class Accounts:
         self.userobjects = {}
         with open(admin_file) as f:
             self.admin_emails = f.read().split("\n")
+        if beta_users:
+            with open(beta_users) as f:
+                self.beta_users = f.read().split("\n")
     def get_public_face(self, id) -> UserPublicFace | bool:
         "Returns tuple where first object is account's username, second is picture url."
         with self.make_connection() as connection:
@@ -45,7 +49,9 @@ class Accounts:
         return cookie 
     def logout(self, cookie):
         del self.userobjects[cookie]
-    def login(self, unique_id, users_name, users_email, picture) -> str:
+    def login(self, unique_id, users_name, users_email, picture) -> str | bool:
+        if self.beta_users and users_email not in self.beta_users:
+            return False
         with self.make_connection() as connection:
             r = connection.execute('SELECT EXISTS(SELECT 1 FROM Accounts WHERE ID=?);', (unique_id,))
         if r.fetchone() == (1,):

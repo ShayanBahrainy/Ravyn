@@ -134,7 +134,7 @@ class CommentManager:
             offset = math.floor(random.random() * count) 
             if count < CommentManager.MAX_FEED_LENGTH:
                 offset = 0
-            r = connection.execute("SELECT * FROM Comments WHERE PostID=? LIMIT ? OFFSET ?;",(postid, ContentManager.MAX_FEED_LENGTH, offset))
+            r = connection.execute("SELECT * FROM Comments WHERE PostID=? LIMIT ? OFFSET ?;",(postid, CommentManager.MAX_FEED_LENGTH, offset))
             results = r.fetchall()
             for comment in results:
                 PostId, CommentID, Owner, Body = comment
