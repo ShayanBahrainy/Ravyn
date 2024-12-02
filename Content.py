@@ -27,10 +27,10 @@ class ContentManager:
             connection.execute("pragma journal_mode=wal;")
             connection.execute("CREATE TABLE IF NOT EXISTS Posts (ID TEXT, VIEWS INTEGER, OWNER INTEGER, BODY TEXT, TITLE TEXT);")
     
-    def make_connection(self) -> sqlite3.Connection:
+    def make_connection(self):
         return sqlite3.connect(self.db)
     
-    def get_title(self, ID: str) -> str | bool:
+    def get_title(self, ID: str):
         with self.make_connection() as connection:
             r = connection.execute("SELECT Title FROM Posts WHERE ID=?;",(ID,))
             title = r.fetchone()
@@ -39,7 +39,7 @@ class ContentManager:
         return False
     
     @staticmethod
-    def hash(text: str) -> str:
+    def hash(text: str):
         return str(hashlib.sha256(text.encode()).digest())
     
     def validate_post_for_showing(self, id: str):
@@ -49,7 +49,7 @@ class ContentManager:
             return True
         return False
     
-    def get_feed(self) -> list[Post]:
+    def get_feed(self):
         results = []
         with self.make_connection() as connection:
             r = connection.execute("SELECT COUNT(*) FROM Posts;")
@@ -66,7 +66,7 @@ class ContentManager:
                 user = self.accounts.get_public_face(post[2])
                 results.append(Post(post[0], post[4], user.name, user.profileimage, post[3]))
         return results
-    def get_post(self, id: str) -> Post:
+    def get_post(self, id: str):
         if not self.validate_post_for_showing(id):
             return
         with self.make_connection() as connection:
@@ -75,7 +75,7 @@ class ContentManager:
         user = self.accounts.get_public_face(r[2])
         return Post(r[0], r[1], user.name, user.profileimage, r[3])
     
-    def create_post(self, title: str, body: str, user_id: int) -> str | bool:
+    def create_post(self, title: str, body: str, user_id: int):
         if len(body) < ContentManager.MIN_BODY_LENGTH:
             return "Body too short"
         if len(title) < ContentManager.MIN_TITLE_LENGTH:
@@ -107,14 +107,14 @@ class CommentManager:
         with self.make_connection() as connection:
             connection.execute("pragma journal_mode=wal;")
             connection.execute("CREATE TABLE IF NOT EXISTS Comments (PostID TEXT, CommentID TEXT, OWNER INTEGER, BODY TEXT);")
-    def add_comment(self, Post: Post, Owner: User, Text: str) -> str:
+    def add_comment(self, Post: Post, Owner: User, Text: str):
         if len(Text) < CommentManager.MinimumCommentLength:
             return "Comment is too short."
         with self.make_connection() as connection:
             id = str(uuid.uuid4())
             connection.execute("INSERT INTO Comments (PostID, CommentID, OWNER, BODY) VALUES (?,?,?,?);",(Post.id, id, Owner.id, Text,))
         return 'Success!'
-    def get_comments(self, postid: str) -> list[Comment]:
+    def get_comments(self, postid: str):
         comments = []
         with self.make_connection() as connection:
             cursor = connection.execute("SELECT * FROM Comments WHERE PostID=?;",(postid,))
@@ -124,7 +124,7 @@ class CommentManager:
                 Owner = self.contentmanager.accounts.get_public_face(Owner)
                 comments.append(Comment(CommentID, Body, Owner, PostId))
         return comments
-    def get_feed(self, postid: str) -> list[Comment]:
+    def get_feed(self, postid: str):
         comments = []
         with self.make_connection() as connection:
             r = connection.execute("SELECT COUNT(*) FROM Comments WHERE PostID=?;",(postid,))
@@ -141,7 +141,7 @@ class CommentManager:
                 Owner = self.contentmanager.accounts.get_public_face(Owner)
                 comments.append(Comment(CommentID, Body, Owner, PostId))
         return comments
-    def get_comment(self, commentid: str) -> None | Comment:
+    def get_comment(self, commentid: str):
         with self.make_connection() as connection:
             cursor = connection.execute("SELECT EXISTS(SELECT 1 FROM Comments WHERE CommentID=?);",(commentid,))
             result = cursor.fetchone()
@@ -168,11 +168,11 @@ class ReportManager:
             connection.execute("pragma journal_mode=wal;")
             connection.execute("CREATE TABLE IF NOT EXISTS Reports (CONTENTID TEXT, TYPE INTEGER, USERID INTEGER);")
 
-    def clear_reports(self, ContentID: str, typ: int) -> None:
+    def clear_reports(self, ContentID: str, typ: int):
         with self.make_connection() as connection:
             connection.execute("DELETE FROM Reports WHERE CONTENTID=? AND TYPE=?;",(ContentID,typ))
 
-    def takedown(self, ContentID: str, typ: int) -> bool:
+    def takedown(self, ContentID: str, typ: int):
         Content = self.get_content(ContentID, typ)
         if type(Content) == Post:
             self.contentmanager.delete_post(Content.id)
@@ -181,7 +181,7 @@ class ReportManager:
         with self.make_connection() as connection:
             connection.execute("DELETE FROM Reports WHERE CONTENTID=? AND TYPE=?;", (Content.id,typ))
     @staticmethod
-    def Convert_Type_To_Int(obj: Post | Comment) -> int:
+    def Convert_Type_To_Int(obj: Post | Comment):
         if isinstance(obj, type):
             if obj == Post:
                 return 0
@@ -212,12 +212,12 @@ class ReportManager:
         return Post
     def make_connection(self):
         return sqlite3.connect(self.db)
-    def get_report_count(self, content: Post | Comment) -> int:
+    def get_report_count(self, content: Post | Comment):
         Type = ReportManager.Convert_Type_To_Int(content)
         with self.make_connection() as connection:
             cursor = connection.execute("SELECT COUNT(*) FROM Reports WHERE CONTENTID=? AND Type=?;",(content.id,Type))
             return cursor.fetchone()[0]
-    def get_feed(self) -> list[Post]:
+    def get_feed(self):
         results = []
         with self.make_connection() as connection:
             r = connection.execute("SELECT COUNT(*) FROM Reports;")
@@ -235,7 +235,7 @@ class ReportManager:
                 if content:
                     results.append(Report(content, self.get_report_count(content)))
         return results
-    def get_content(self, contentid: str, typ: int) -> Post | Comment:
+    def get_content(self, contentid: str, typ: int):
         Type = ReportManager.Convert_Int_To_Type(typ)
         if Type == Post:
             return self.contentmanager.get_post(contentid)
