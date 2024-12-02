@@ -7,7 +7,7 @@
     <body>
         <p class="Header Largetext">{{post.name}}</p>
 
-        <select title="Extra Options" id="menu" class="controlsButton menuOptions">
+        <select title="Extra Options" id="menu" class="controlsButton menuOptions Button">
         <option value="" class="MenuOption" disabled selected>...</option>
         <option class="MenuOption" value="report">Report</option>
         </select> 
@@ -17,5 +17,15 @@
         <textarea type="text" class="NewComment" placeholder="Type comment here" id="NewComment"></textarea>
         <button class="SubmitComment" id="SubmitComment" >Comment</button>
         </div>
+        {% if Comments %}
+        <div class="CommentHolder">
+            {% for comment in Comments%}
+            <div class="Comment">
+            <img src="{{comment.owner.profileimage}}" class="CommentImage ProfilePicture">
+            <p class="CommentContent"> {{comment.content}}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </body>
 </html>

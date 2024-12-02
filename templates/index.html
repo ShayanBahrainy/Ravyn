@@ -2,25 +2,32 @@
     <head>
         <link rel="stylesheet" href="/static/index.css">
         <script src="/static/index.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body class="Body">
         {% if username %}
+        <div clas="Menu">
         <img src="/static/icons/newpost.png" class="NewPost" id="NewPost">
         <p class="WelcomeMessage LargeText">Welcome {{username.capitalize()}}.</p>
-        <img src="{{picture}}" class="ProfileImage">
+        {% if admin %}
+        <button class="AdminButton" onclick="location='/admin/console'">⚙️</button>
+        {% endif %}
+        <img src="{{picture}}" class="ProfilePicture SelfProfile">
+        </div>
         {%endif%}
         {%if not username%}
-        <p class="SmallText">You are not logged in.</p>
-        <a href="/login">Login with Google.</a>
+        <p class="WelcomeMessage LargeText">Welcome Stranger!</p>
+        <p class="SmallText NotLoggedIn">You are not logged in.</p>
+        <button onclick="location='/login'" class="LoginButton">Get in!</button>
         {%endif%}
         <hr class="TopBarDivider">
         {% if feed%}
         <div class="Feed">
         {% for post in feed%}
             <div class="Post" onclick="location='/post/{{post.id}}'">
-                <p class="Title">{{post.name.capitalize()}}</p>
-                <p class="Author">{{post.author.capitalize()}}</p>
-                <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile">
+                <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile ProfilePicture">
+                <p class="PostTitle SmallText ">{{post.name.capitalize()}}</p>
+                <p class="SmallText PostContent">{{post.content}}</p>
             </div>
         {%endfor%}
         </div>

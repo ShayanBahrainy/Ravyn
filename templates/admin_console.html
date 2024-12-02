@@ -4,19 +4,19 @@
         <script src="/static/admin_console.js"></script>
     </head>
     <body>
-        <h1 class="Header">Moderate!</h1>
+        <h1 class="Header LargeText">Moderate!</h1>
         {% if reports%}
         <table class="ReportsContainer">
             <tr>
-                <th>Title</th>
-                <th>Reports</th>
+                <th class="UGCData">Title</th>
+                <th class="UGCData">Reports</th>
                 <th>Save</th>
                 <th>Delete</th>
             </tr>
             {% for report in reports %}
-            <tr>
-                <td>{{report.post.name}}</td>
-                <td>{{report.reportquantity}}</td>
+            <tr id="{{report.post.id}}">
+                <td class="UGCData">{{report.post.name}}</td>
+                <td class="UGCData">{{report.reportquantity}}</td>
                 <td><button  class="ActionButton" onclick="freePost('{{ report.post.id }}','{{ report.post.name }}')">✅</button></td>
                 <td><button  class="ActionButton" onclick="deletePost('{{ report.post.id }}', '{{ report.post.name }}')">❌</button></td>
             </tr>
@@ -24,7 +24,8 @@
         </table>
         {% endif %}
         {% if not reports %}
-        <p class="LargeText">No Reports! Good Job!</p>
+        <p class="SmallText NoReportsMessage">No Reports! Good Job!</p>
         {% endif%}
+        <button onclick="history.back()" class="Button backButton LargeText">←</button>
     </body>
 </html>

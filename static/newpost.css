@@ -1,30 +1,58 @@
 @import url("/static/base.css");
-.Body { 
+.PostField { 
     background-color: var(--BackgroundColor);
+    position: relative;
+    left: 10%;
+    top: 0%;
+    border: none;
+    background: none;
+    color: var(--MainColor);
 }
-.SmallText {
-    color: var();
-    size: 12em;
+.PublishButton {
+    position: relative;
+    top: 20%;
+    left: 25%;
+    margin-left: 10%;
+    margin-top: 5%;
+    margin-bottom: 0px;
+    border: none;
+    background-color: var(--SideColor);
+    color: var(--MainColor);
 }
-.LargeText {
-    color: var(--TextColor);
-    size: 64em;
+.PublishButton:hover {
+    background-color: var(--LightSideColor);
 }
 .Header {
     position: fixed;
-    top: 5%;
-    left: 45%;
+    top: 0%;
+    left: 40%;
 }
 .Form {
     position: fixed;
     left: 40%;
     top: 20%;
+    min-height: 500px;
     background-color: var(--SideColor);
 }
 .Title {
     position: relative;
-    left: 5%;
+    left: 30%;
+    top: 0%;
+    margin: 5%;
+}
+.TitleField {
+    position: relative;
+    left: 30%;
+    top: 0%;
+    border: none;
+    background: none;
+    color: var(--MainColor);
 }
 .hidden {
     display: none;
+}
+.Post {
+    position: relative;
+    left: 30%;
+    margin: 5%;
 }

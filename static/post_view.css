@@ -2,18 +2,10 @@
 body {
     background-color: var(--BackgroundColor);
 }
-.SmallText {
-    color: var(--TextColor);
-    font-size: 1.5em;
-}
-.LargeText {
-    color: var(--SideColor);
-    font-size: 3em;
-}
 .Header {
     position: absolute;
     top: 5%;
-    left: 15%;
+    left: 30%;
 }
 .Content {
     position: relative;
@@ -21,6 +13,7 @@ body {
     top: 10%;
     text-overflow: break-word;
     width: 40%;
+    max-width: max-content;
 }
 .controlsButton {
     background-color: var(--SideColor);
@@ -28,9 +21,6 @@ body {
     position: relative;
     left: 80%;
     border: none;
-    width: 8%;
-    height: 4%;
-    display: inline-block;
 }
 .backButton {
     display: inline-block;
@@ -52,6 +42,7 @@ body {
     position: relative;
     top: 15%;
     left: 30%;
+    width: 40%;
 }
 .NewComment {
     border: none;
@@ -69,7 +60,7 @@ body {
     background-color: var(--SideColor);
     color: var(--MainColor);
     height: 5%;
-    width: 10%;
+    width: 12%;
     position: relative;
     top: -30px; /* Move the button upwards */
     vertical-align: middle;
@@ -83,4 +74,25 @@ body {
 }
 .NewComment,.NewComment::placeholder {
     font: 1.5rem/3 sans-serif;
+}
+.CommentHolder {
+    position: relative;
+    top: 25%;
+    display: flex;
+    flex-direction: column;
+}
+.CommentImage {
+    width: 5%;
+    height: 5%;
+}
+.Comment {
+    display: flex;
+    gap: 2%;
+    position: relative;
+    left: 30%;
+    width: 40%;
+}
+.CommentContent {
+    overflow-wrap: anywhere;
+    text-wrap: wrap;
 }

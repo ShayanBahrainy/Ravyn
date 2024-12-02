@@ -10,13 +10,11 @@
         <p class="LargeText Header">Write a post!</p>
         {%endif%}
         <form enctype="multipart/form-data" method="post" class="Form">
-            <p class="Title">Title</p>
-            <input type="text" name="Title" class="TitleField">
-            <p class="Paper">Paper</p>
-            <textarea name="Body" class="Body SmallText">
-                (Write post here!)
-            </textarea>
-            <button type="submit" id="Publish" >Publish</button>
+            <p class="Title LargeText">Title</p>
+            <input type="text" name="Title" class="TitleField" placeholder="(Write Title here!)" minlength="10" maxlength="100">
+            <p class="Post LargeText">Post</p>
+            <textarea name="Body" class="PostField SmallText" placeholder="(Write post here!)" minlength="100"></textarea>
+            <button type="submit" id="Publish" class="PublishButton">Publish</button>
         </form>
     </body>
 </html>

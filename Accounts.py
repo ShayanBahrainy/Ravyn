@@ -12,7 +12,11 @@ class User:
         self.admin = email in accounts.admin_emails
     def logout(self):
         del self.accounts[self.cookie]
-
+class UserPublicFace:
+    "Public Facing User Object"
+    def __init__(self, name: str, profileimage: str):
+        self.name = name
+        self.profileimage = profileimage
 class Accounts:
     def __init__(self, db: str, admin_file: str):
         self.db = db
@@ -23,13 +27,13 @@ class Accounts:
         self.userobjects = {}
         with open(admin_file) as f:
             self.admin_emails = f.read().split("\n")
-    def get_public_face(self, id) -> tuple[str] | bool:
+    def get_public_face(self, id) -> UserPublicFace | bool:
         "Returns tuple where first object is account's username, second is picture url."
         with self.make_connection() as connection:
             r = connection.execute("SELECT USERNAME,PICTURE FROM Accounts WHERE ID = ?;", (id,))
             result = r.fetchone()
             if result:
-                return (result[0],result[1])
+                return UserPublicFace(result[0],result[1])
         return False
     def make_connection(self):
         return sqlite3.connect(self.db)

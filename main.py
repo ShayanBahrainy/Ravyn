@@ -4,7 +4,7 @@ import sqlite3
 import requests
 
 from Accounts import Accounts
-from Content import ContentManager, ReportManager
+from Content import ContentManager, ReportManager, CommentManager
 
 from oauthlib.oauth2 import WebApplicationClient
 
@@ -18,8 +18,9 @@ def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
 accounts = Accounts("Accounts.db", "admin.txt")
-contentmanager = ContentManager("Papers.db", accounts)
-reportmanager = ReportManager("Reports.db", contentmanager)
+contentmanager = ContentManager("Posts.db", accounts)
+commentmanager = CommentManager("Posts.db", contentmanager)
+reportmanager = ReportManager("Reports.db", contentmanager, commentmanager)
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 app = Flask(__name__)
@@ -33,7 +34,7 @@ def index():
     if request.cookies.__contains__("AUTH"):
         user = accounts.is_logged_in(request.cookies["AUTH"])
         if user:
-            return render_template("index.html",username=user.username, picture=user.picture, feed=contentmanager.get_feed())
+            return render_template("index.html",username=user.username, picture=user.picture, feed=contentmanager.get_feed(),admin=user.admin)
     return render_template("index.html",username=False, feed=contentmanager.get_feed())
 
 @app.route("/post/", methods=["GET","POST"])
@@ -65,25 +66,27 @@ def report(PostID):
     if not post:
         return abort(404)
     return str(reportmanager.make_report(post, user))
-@app.route("/report/clear/<PostID>",methods=["POST"])
-def clear_report(PostID):
+@app.route("/report/clear/<ContentID>",methods=["POST"])
+def clear_report(ContentID):
     if not request.cookies.__contains__("AUTH"):
         return abort(403)
     user = accounts.is_logged_in(request.cookies["AUTH"])
     if not user or not user.admin:
         return abort(403)
-    reportmanager.clear_reports(PostID)
-    return 'True'
+    typ = ReportManager.Convert_Type_To_Int(reportmanager.get_type_by_id(ContentID))
+    reportmanager.clear_reports(ContentID, typ)
+    return 'Success!'
 
-@app.route("/report/delete/<PostID>", methods=["POST"])
-def delete_because_report(PostID):
+@app.route("/report/delete/<ContentID>", methods=["POST"])
+def delete_because_report(ContentID):
     if not request.cookies.__contains__("AUTH"):
         return abort(403)
     user = accounts.is_logged_in(request.cookies["AUTH"])
     if not user or not user.admin:
         return abort(403)
-    reportmanager.takedown_post(PostID)
-    return 'True'
+    typ = ReportManager.Convert_Type_To_Int(reportmanager.get_type_by_id(ContentID))
+    reportmanager.takedown(ContentID, typ)
+    return 'Success!'
 @app.route("/comment/<PostID>",methods=["POST"])
 def comment_index(PostID):
     if not request.cookies.__contains__("AUTH"):
@@ -91,8 +94,12 @@ def comment_index(PostID):
     user = accounts.is_logged_in(request.cookies["AUTH"])
     if not user:
         return abort(403)
-    assert request.content_type == "application/json", "Incorrect Content Type"
-    return contentmanager.add_comment(PostID, request.json)
+    assert request.content_type == "application/json", "Incorrect Content Type!"
+    assert request.json["Comment"], "No comment submitted!"
+    Post = contentmanager.get_post(PostID)
+    if not Post:
+        return abort(404)
+    return commentmanager.add_comment(Post, user, request.json["Comment"])
 @app.route("/admin/console/")
 def admin_console():
     if not request.cookies.__contains__("AUTH"):
@@ -100,15 +107,15 @@ def admin_console():
     user = accounts.is_logged_in(request.cookies["AUTH"])
     if not user or not user.admin:
         return redirect("/")
-    return render_template("admin_console.html", reports=reportmanager.get_feed())
+    feed = reportmanager.get_feed()
+    return render_template("admin_console.html", reports=feed)
 
 @app.route("/post/<PostID>")
 def LoadPaper(PostID):
     post = contentmanager.get_post(PostID)
     if not post:
-        return "Not Found!"
-    
-    return render_template("post_view.html", post=post, PostID=PostID)
+        return "Not Found!" 
+    return render_template("post_view.html", post=post, PostID=PostID, Comments=commentmanager.get_feed(PostID))
 
 @app.route("/login/")
 def login():

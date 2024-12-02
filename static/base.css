@@ -10,3 +10,24 @@
 ::placeholder {
     color: var(--MainColor);
 }
+.ProfilePicture {
+    border-radius: 5%;
+    border-style: solid;
+    border-width: 2px;
+    border-color: var(--MainColor);
+    display: inline-block;
+}
+.SmallText {
+    color: var(--TextColor);
+    font-size: 1.5em;
+}
+.LargeText {
+    color: var(--MainColor);
+    font-size: 3em;
+}
+.Button {
+    border: none;
+    width: 8%;
+    height: 4%;
+    background: none;
+}
