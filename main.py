@@ -8,8 +8,11 @@ from Content import ContentManager, ReportManager, CommentManager
 
 from oauthlib.oauth2 import WebApplicationClient
 
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
-GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
+
+with open("Client.id") as f:
+    GOOGLE_CLIENT_ID = f.read()
+with open("Client.secret") as f:
+    GOOGLE_CLIENT_SECRET = f.read()
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
