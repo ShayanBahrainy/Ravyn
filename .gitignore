@@ -3,3 +3,5 @@ ravyn.key
 Reports.db
 Posts.db
 Accounts.db
+Client.id
+Client.secret
