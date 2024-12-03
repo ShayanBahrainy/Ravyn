@@ -50,7 +50,7 @@ class Accounts:
     def logout(self, cookie):
         del self.userobjects[cookie]
     def login(self, unique_id, users_name, users_email, picture):
-        if self.beta_users and users_email not in self.beta_users:
+        if hasattr(self, "beta_users") and users_email not in self.beta_users:
             return False
         with self.make_connection() as connection:
             r = connection.execute('SELECT EXISTS(SELECT 1 FROM Accounts WHERE ID=?);', (unique_id,))
