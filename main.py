@@ -10,9 +10,10 @@ from oauthlib.oauth2 import WebApplicationClient
 
 
 with open("Client.id") as f:
-    GOOGLE_CLIENT_ID = f.read()
+    GOOGLE_CLIENT_ID = f.read().strip()
 with open("Client.secret") as f:
-    GOOGLE_CLIENT_SECRET = f.read()
+    GOOGLE_CLIENT_SECRET = f.read().strip()
+
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
@@ -132,6 +133,7 @@ def login():
         redirect_uri=request.base_url + "google-auth",
         scope=["openid", "email", "profile"],
     )
+    print(request_uri)
     return redirect(request_uri)
 
 @app.route("/login/google-auth")
