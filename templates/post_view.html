@@ -6,8 +6,8 @@
         <link rel="shortcut icon" href="/static/icons/favicon.ico">
     </head>
     <body>
-        <p class="Header Largetext">{{post.name}}</p>
-
+        <p class="Header LargeText">{{post.name}}</p>
+        <p class="Header ReallySmallText AuthorName">By {{post.author.capitalize()}}</p>
         <select title="Extra Options" id="menu" class="controlsButton menuOptions Button">
         <option value="" class="MenuOption" disabled selected>...</option>
         <option class="MenuOption" value="report">Report</option>
@@ -15,6 +15,16 @@
         <button id="backButton" class="backButton LargeText">←</button>
         <p class="Content SmallText"> {{post.content}}</p>
         <div class="CreateComment">
+            {% if commentSuccess > 0 %}
+            <p class="CreateCommentMessage" id="CreateCommentMessage">
+                {% if commentSuccess == 1 %}
+                Sorry, your comment didn't succeed.
+                {% endif %}
+                {% if commentSuccess == 2 %}
+                Commented!
+                {% endif %}
+            </p>
+            {% endif %}
         <textarea type="text" class="NewComment" placeholder="Type comment here" id="NewComment"></textarea>
         <button class="SubmitComment" id="SubmitComment" >Comment</button>
         </div>
@@ -24,6 +34,7 @@
             <div class="Comment">
             <img src="{{comment.owner.profileimage}}" class="CommentImage ProfilePicture">
             <p class="CommentContent"> {{comment.content}}</p>
+            <select class="CommentOptions" data-id="{{comment.id}}"><option selected disabled>...</option><option value="Report">Report</option></select>
             </div>
             {% endfor %}
         </div>

@@ -3,9 +3,30 @@ body {
     background-color: var(--BackgroundColor);
 }
 .Header {
-    position: absolute;
+    position: relative;
     top: 5%;
     left: 30%;
+    text-wrap: wrap;
+    max-width: 70%;
+    overflow: auto;
+    word-wrap: break-word;
+}
+.CreateCommentMessage {
+    position: relative;
+    left: 10%;
+    color: var(--MainColor);
+}
+.AuthorName {
+    top: 0%;
+    margin: 0px;
+}
+.CommentOptions {
+    border: none;
+    background: none;
+    color: var(--MainColor);
+    position: relative;
+    left: 10%;
+    font-size: 1.5em;
 }
 .Content {
     position: relative;
@@ -13,18 +34,19 @@ body {
     top: 10%;
     text-overflow: break-word;
     width: 40%;
-    max-width: max-content;
+    max-width: 70%;
 }
 .controlsButton {
     background-color: var(--SideColor);
     color: var(--MainColor);
-    position: relative;
+    position: absolute;
     left: 80%;
+    top: 5%;
     border: none;
 }
 .backButton {
     display: inline-block;
-    position: relative;
+    position: absolute;
     left: 5%;
     top: 0%;
     border: none;

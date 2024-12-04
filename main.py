@@ -4,7 +4,7 @@ import sqlite3
 import requests
 
 from Accounts import Accounts
-from Content import ContentManager, ReportManager, CommentManager
+from Content import ContentManager, Post, ReportManager, CommentManager, Comment
 
 from oauthlib.oauth2 import WebApplicationClient
 
@@ -59,17 +59,22 @@ def newPostPage():
         if type(r) != str:
             return redirect("/")
         return render_template("new_post.html", failReason=r)
-@app.route("/report/<PostID>", methods=["POST"])
-def report(PostID):
+@app.route("/report/<ContentID>", methods=["POST"])
+def report(ContentID):
     if not request.cookies.__contains__("AUTH"):
         return redirect("/")
     user = accounts.is_logged_in(request.cookies["AUTH"])
     if not user:
         return abort(403)
-    post = contentmanager.get_post(PostID)
-    if not post:
+    typ = reportmanager.get_type_by_id(ContentID)
+    if typ == Post:
+        content = contentmanager.get_post(ContentID)
+    if typ == Comment:
+        content = commentmanager.get_comment(ContentID)
+    reportmanager.make_report(content,user)
+    if not content:
         return abort(404)
-    return str(reportmanager.make_report(post, user))
+    return str(reportmanager.make_report(content, user))
 @app.route("/report/clear/<ContentID>",methods=["POST"])
 def clear_report(ContentID):
     if not request.cookies.__contains__("AUTH"):
@@ -119,7 +124,14 @@ def LoadPaper(PostID):
     post = contentmanager.get_post(PostID)
     if not post:
         return "Not Found!" 
-    return render_template("post_view.html", post=post, PostID=PostID, Comments=commentmanager.get_feed(PostID))
+    #0 = No Comment Attempted, #1 = Fail, #2 Success
+    commentSuccess = 0
+    if request.args.get("commentSuccess") != None:
+        if request.args.get("commentSuccess") == "True":
+            commentSuccess = 2
+        else:
+            commentSuccess = 1
+    return render_template("post_view.html", post=post, PostID=PostID, Comments=commentmanager.get_feed(PostID), commentSuccess=commentSuccess)
 
 @app.route("/login/")
 def login():

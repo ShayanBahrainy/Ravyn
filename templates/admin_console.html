@@ -9,17 +9,15 @@
         {% if reports%}
         <table class="ReportsContainer">
             <tr>
-                <th class="UGCData">Title</th>
-                <th class="UGCData">Reports</th>
+                <th class="UGCData">Title/Comment</th>
                 <th>Save</th>
                 <th>Delete</th>
             </tr>
             {% for report in reports %}
-            <tr id="{{report.post.id}}">
-                <td class="UGCData">{{report.post.name}}</td>
-                <td class="UGCData">{{report.reportquantity}}</td>
-                <td><button  class="ActionButton" onclick="freePost('{{ report.post.id }}','{{ report.post.name }}')">✅</button></td>
-                <td><button  class="ActionButton" onclick="deletePost('{{ report.post.id }}', '{{ report.post.name }}')">❌</button></td>
+            <tr id="{{report.content.id}}">
+                <td class="UGCData">{{report.reportcontent}}</td>
+                <td><button  class="ActionButton" onclick="freeContent('{{ report.content.id }}','{{ report.reportcontent }}')">✅</button></td>
+                <td><button  class="ActionButton" onclick="deleteContent('{{ report.content.id }}', '{{ report.reportcontent}}')">❌</button></td>
             </tr>
             {% endfor %}
         </table>

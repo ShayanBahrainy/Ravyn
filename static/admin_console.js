@@ -1,16 +1,16 @@
-function freePost (id, name) {
+function freeContent (id, name) {
     let confirmation = confirm("Clear all reports for \"" + name + "\"?")
     if (confirmation) {
         fetch("/report/clear/" + id, {method: "POST", credentials:"same-origin"})
+        removeFromTable(id)
     }
-    removeFromTable(id)
 }
-function deletePost (id,name) {
+function deleteContent (id,name) {
     let confirmation = confirm("Delete the post \"" + name + "\"?")
     if (confirmation) {
         fetch("/report/delete/" + id, {method: "POST", credentials:"same-origin"})
+        removeFromTable(id)
     }
-    removeFromTable(id)
 }
 function removeFromTable(id) {
     document.getElementById(id).remove()

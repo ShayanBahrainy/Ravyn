@@ -153,8 +153,8 @@ class CommentManager:
         owner = self.contentmanager.accounts.get_public_face(owner)
         return Comment(commentid, content, owner, postid)
     def delete_comment(self, Comment: Comment):
-        with self.make_comment() as connection:
-            connection.execute("DELETE FROM Comments WHERE CommentID=?;",(Comment.id))
+        with self.make_connection() as connection:
+            connection.execute("DELETE FROM Comments WHERE CommentID=?;",(Comment.id,))
     def make_connection(self):
         return sqlite3.connect(self.db)
 class ReportManager:
@@ -228,10 +228,14 @@ class ReportManager:
             offset = math.floor(random.random() * count) 
             if count < ReportManager.MAX_FEED_LENGTH:
                 offset = 0
-            r = connection.execute("SELECT CONTENTID, USERID FROM Reports GROUP BY CONTENTID LIMIT ? OFFSET ?;",(ContentManager.MAX_FEED_LENGTH, offset))
+            r = connection.execute("SELECT CONTENTID, USERID FROM Reports GROUP BY CONTENTID LIMIT ? OFFSET ?;",(ReportManager.MAX_FEED_LENGTH, offset))
             reports = r.fetchall()
             for report in reports:
-                content = self.contentmanager.get_post(report[0])
+                typ = self.get_type_by_id(report[0])
+                if typ == Post:
+                    content = self.contentmanager.get_post(report[0])
+                if typ == Comment:
+                    content = self.commentmanager.get_comment(report[0])
                 if content:
                     results.append(Report(content, self.get_report_count(content)))
         return results
@@ -242,6 +246,7 @@ class ReportManager:
         if Type == Comment:
             return self.commentmanager.get_comment(contentid)
 class Report:
-    def __init__(self, post: Post, reportquantity: int):
-        self.post = post
+    def __init__(self, content: Post | Comment, reportquantity: int):
+        self.content = content
+        self.reportcontent = content.name if type(content) == Post else content.content
         self.reportquantity = reportquantity

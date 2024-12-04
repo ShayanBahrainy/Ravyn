@@ -21,6 +21,10 @@
     color: var(--TextColor);
     font-size: 1.5em;
 }
+.ReallySmallText {
+    color: var(--TextColor);
+    font-size: 1em; 
+}
 .LargeText {
     color: var(--MainColor);
     font-size: 3em;

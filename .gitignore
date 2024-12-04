@@ -5,3 +5,7 @@ Posts.db
 Accounts.db
 Client.id
 Client.secret
+Posts.db-shm
+Post.db-wal
+Accounts.db-shm
+Accounts.db-wal
