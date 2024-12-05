@@ -1,11 +1,12 @@
 :root {
-    --MainColor: #9593d9;
-    --SideColor: #5E239D;
-    --BackgroundColor: #f1f9ff;
-    --TextColor: #0F0F0F;
-    --LightTextColor: #FBFBFB;
-    --LightSideColor: #6800cf;
-    --LightBackgroundColor: #d9d8f8;
+    --MainColor: #342E37;
+    --SideColor: #FFFF;
+    --BackgroundColor: #FFFFFF;
+    --TextColor: #121212;
+    --LightTextColor: #121212;
+    --LightSideColor: #fcf2fb;
+    --LightBackgroundColor: #FFFF;
+    --GreyColor: #946cbb;
 }
 ::placeholder {
     color: var(--MainColor);

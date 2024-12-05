@@ -5,6 +5,15 @@ function freeContent (id, name) {
         removeFromTable(id)
     }
 }
+function showContent(postid, commentid) {
+    if (!commentid) {
+        window.open("/post/" + id)
+    }
+    else {
+        window.open("/post/" + postid + "/?showComment=" + commentid)
+    }
+
+}
 function deleteContent (id,name) {
     let confirmation = confirm("Delete the post \"" + name + "\"?")
     if (confirmation) {

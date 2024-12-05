@@ -7,12 +7,18 @@ import math
 from Accounts import Accounts, User, UserPublicFace
 
 class Post:
+    ContentPreviewMaxLength = 150
     def __init__(self, id: str, name: str, author: int, authorprofile: str, content: str, comments: list['Comment']=[]):
         self.id = id
         self.name = name
         self.author = author
         self.authorprofile = authorprofile
         self.content = content
+        self.showmore = len(content) > Post.ContentPreviewMaxLength
+        if len(content) > Post.ContentPreviewMaxLength:
+            self.contentpreview = self.content[:Post.ContentPreviewMaxLength + 1]
+        else:
+            self.contentpreview = content
         self.comments = comments
 
 class ContentManager:
@@ -107,13 +113,13 @@ class CommentManager:
         with self.make_connection() as connection:
             connection.execute("pragma journal_mode=wal;")
             connection.execute("CREATE TABLE IF NOT EXISTS Comments (PostID TEXT, CommentID TEXT, OWNER INTEGER, BODY TEXT);")
-    def add_comment(self, Post: Post, Owner: User, Text: str):
+    def add_comment(self, Post: Post, Owner: User, Text: str) -> bool | str:
         if len(Text) < CommentManager.MinimumCommentLength:
             return "Comment is too short."
         with self.make_connection() as connection:
             id = str(uuid.uuid4())
             connection.execute("INSERT INTO Comments (PostID, CommentID, OWNER, BODY) VALUES (?,?,?,?);",(Post.id, id, Owner.id, Text,))
-        return 'Success!'
+        return True
     def get_comments(self, postid: str):
         comments = []
         with self.make_connection() as connection:
@@ -124,16 +130,24 @@ class CommentManager:
                 Owner = self.contentmanager.accounts.get_public_face(Owner)
                 comments.append(Comment(CommentID, Body, Owner, PostId))
         return comments
-    def get_feed(self, postid: str):
+    def get_feed(self, postid: str, start_at: str=None):
+        "If start_at is given, comment feed will start at given comment."
         comments = []
         with self.make_connection() as connection:
+            if start_at != None and self.get_comment(start_at) != None:
+                cursor = connection.execute("SELECT rowid,* from Comments WHERE PostID=? AND CommentID=?;",(postid,start_at,))
+                result = cursor.fetchone()
+                offset, POSTID, COMMENTID, OWNER, BODY = result
+                OWNER = self.contentmanager.accounts.get_public_face(OWNER)
+                comments.append(Comment(COMMENTID,BODY,OWNER,POSTID))
             r = connection.execute("SELECT COUNT(*) FROM Comments WHERE PostID=?;",(postid,))
             count = r.fetchone()[0]
             if count == 0:
                 return []
-            offset = math.floor(random.random() * count) 
-            if count < CommentManager.MAX_FEED_LENGTH:
-                offset = 0
+            if not start_at:
+                offset = math.floor(random.random() * count) 
+                if count < CommentManager.MAX_FEED_LENGTH:
+                    offset = 0
             r = connection.execute("SELECT * FROM Comments WHERE PostID=? LIMIT ? OFFSET ?;",(postid, CommentManager.MAX_FEED_LENGTH, offset))
             results = r.fetchall()
             for comment in results:

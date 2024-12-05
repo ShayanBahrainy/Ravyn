@@ -1,34 +1,47 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <link rel="stylesheet" href="/static/index.css">
         <script src="/static/index.js"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Ravyn is the new friendly social media platform. We strive to be nontoxic, and try to do this via AI.">
         <link rel="shortcut icon" href="/static/icons/favicon.ico">
+        <title>Homepage - Ravyn</title>
     </head>
     <body class="Body">
+    <div class="Menu">
         {% if username %}
-        <div clas="Menu">
-        <img src="/static/icons/newpost.png" class="NewPost" id="NewPost">
-        <p class="WelcomeMessage LargeText">Welcome {{username.capitalize()}}.</p>
+        <img src="/static/icons/newpost.png" class="NewPost" id="NewPost" alt="">
+        <img class="WelcomeMessage LoggedInLogo" alt="RavynLogo" src="/static/icons/favicon.ico">
         {% if admin %}
         <button class="AdminButton" onclick="location='/admin/console'">⚙️</button>
         {% endif %}
-        <img src="{{picture}}" class="ProfilePicture SelfProfile">
-        </div>
+        <img src="{{picture}}" class="ProfilePicture SelfProfile" alt="">
         {%endif%}
         {%if not username%}
-        <p class="WelcomeMessage LargeText">Welcome Stranger!</p>
-        <img class="NotLoggedIn" src="/static/icons/favicon.ico">
+        <p class="WelcomeMessage LargeText">Welcome!</p>
+        <img class="NotLoggedIn" src="/static/icons/favicon.ico" alt="Ravyn Logo">
         <button onclick="location='/login'" class="LoginButton">Log in!</button>
         {%endif%}
+        <!--<img class="SearchIcon" src="/static/icons/search.png" alt="Search" id="OpenSearch"> -->
         <hr class="TopBarDivider">
+    </div>
+        <!--
+        <div class="SearchScreen hidden" id="SearchScreen">
+            <input class="Search" id="SearchBar" placeholder="Search">
+        </div>
+        -->
         {% if feed%}
         <div class="Feed">
         {% for post in feed%}
             <div class="Post" onclick="location='/post/{{post.id}}'">
-                <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile ProfilePicture">
+                <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile ProfilePicture" alt="">
                 <p class="PostTitle SmallText ">{{post.name.capitalize()}}</p>
-                <p class="SmallText PostContent">{{post.content}}</p>
+                {% if post.showmore %}
+                <p class="SmallText PostContent ShowMore">{{post.contentpreview}}  
+                {% else %}
+                <p class="SmallText PostContent">{{post.contentpreview}}  
+                {% endif %}
             </div>
         {%endfor%}
         </div>

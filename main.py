@@ -108,7 +108,11 @@ def comment_index(PostID):
     Post = contentmanager.get_post(PostID)
     if not Post:
         return abort(404)
-    return commentmanager.add_comment(Post, user, request.json["Comment"])
+    result = commentmanager.add_comment(Post, user, request.json["Comment"])
+    if result:
+        return 'Success!'
+    else:
+        return abort(422)
 @app.route("/admin/console/")
 def admin_console():
     if not request.cookies.__contains__("AUTH"):
@@ -117,7 +121,7 @@ def admin_console():
     if not user or not user.admin:
         return redirect("/")
     feed = reportmanager.get_feed()
-    return render_template("admin_console.html", reports=feed)
+    return render_template("admin_console.html", reports=feed,type=type,str=str)
 
 @app.route("/post/<PostID>")
 def LoadPaper(PostID):
@@ -131,7 +135,8 @@ def LoadPaper(PostID):
             commentSuccess = 2
         else:
             commentSuccess = 1
-    return render_template("post_view.html", post=post, PostID=PostID, Comments=commentmanager.get_feed(PostID), commentSuccess=commentSuccess)
+    Comments = commentmanager.get_feed(PostID,start_at=request.args.get("showComment"))
+    return render_template("post_view.html", post=post, PostID=PostID, Comments=Comments, commentSuccess=commentSuccess)
 
 @app.route("/login/")
 def login():

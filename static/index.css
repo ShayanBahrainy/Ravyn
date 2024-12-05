@@ -12,9 +12,17 @@
 .WelcomeMessage {
     position: fixed;
     top: 2%;
-    left: 35%;
+    left: 40%;
     padding: 0px;
     margin: 0px;
+}
+.LoggedInLogo {
+    position: fixed;
+    top: 1%;
+    left: 45.5%;
+    margin: 0px;
+    width: 4.5%;
+    height: 9%;
 }
 .NewPost {
     position: fixed;
@@ -31,10 +39,10 @@
     width: 100%;
 }
 .Feed {
-    position: relative;
+    position: absolute;
+    top: 12.5%;
     left: 25%;
     width: 50%;
-    top: 12.5%;
     justify-content: center;
     display: flex;
     flex-direction: column;
@@ -91,6 +99,7 @@
 .NotLoggedIn {
     position: fixed;
     top: 1%;
+    left: 2%;
     margin: 0px;
     width: 4%;
 }
@@ -106,7 +115,7 @@
 }
 .PostTitle {
     position: relative;
-    left: 15%;
+    left: 10%;
     top: 0%;
     border: none;
     margin: 0px;
@@ -124,8 +133,40 @@
     height: 5%;
 }
 .AdminButton:hover {
-    background-color: var(--LightBackgroundColor);
+    background-color: var(--LightSideColor);
 }
 .PostContent {
     color: var(--LightTextColor);
+}
+.Menu {
+    background-color: var(--BackgroundColor);
+    position: fixed;
+    left: 0%;
+    top: 0%;
+    width: 100%;
+    height: 12%;
+    z-index: 2;
+    opacity: 1;
+    margin-bottom: 25%;
+}
+.ShowMore:after {
+    content: 'Read More';
+    color: var(--GreyColor);
+    display: inline-block;
+}
+.SearchIcon {
+    height: 50%;
+    position: absolute;
+    left: 75%;
+    top: 40%;
+}
+.hidden {
+    display: none;
+}
+.SearchScreen {
+    background-color: var(--BackgroundColor);
+    opacity: 1;
+}
+.SearchBar {
+    border: none;
 }
