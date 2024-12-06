@@ -3,6 +3,7 @@ import uuid
 import hashlib
 import random
 import math
+import json
 
 from Accounts import Accounts, User, UserPublicFace
 
@@ -20,12 +21,12 @@ class Post:
         else:
             self.contentpreview = content
         self.comments = comments
-
 class ContentManager:
     MIN_TITLE_LENGTH = 10
     MAX_TITLE_LENGTH = 100
     MIN_BODY_LENGTH = 100
     MAX_FEED_LENGTH = 10
+    MAX_SEARCH_RESULTS = 10
     def __init__(self, db, accounts: Accounts):
         self.db = db
         self.accounts = accounts
@@ -35,7 +36,26 @@ class ContentManager:
     
     def make_connection(self):
         return sqlite3.connect(self.db)
-    
+    def search(self, query: str, commentmanager: 'CommentManager'):
+        SearchResults = []
+        with self.make_connection() as connection:
+            sqlitequery = "%" + query + "%"
+            cursor = connection.execute("SELECT COUNT(*) FROM Posts WHERE BODY like ? or TITLE like ?;",(sqlitequery, sqlitequery))
+            count = cursor.fetchone()[0]
+            offset = math.floor(random.random() * count)
+            if count < ContentManager.MAX_SEARCH_RESULTS:
+                offset = 0
+            cursor = connection.execute("SELECT * FROM Posts WHERE BODY like ? OR TITLE like ? LIMIT ? OFFSET ?;",(sqlitequery,sqlitequery,ContentManager.MAX_SEARCH_RESULTS,offset))
+            results = cursor.fetchall()
+        for result in results:
+            ID, VIEWS, OWNER, BODY, TITLE = result
+            SearchResult = {}
+            SearchResult["URL"] = "/post/" + ID
+            SearchResult["TITLE"] = TITLE
+            SearchResults.append(SearchResult)
+        data = {}
+        data["Results"] = SearchResults.__add__(commentmanager.__search__(query))
+        return json.dumps(data)
     def get_title(self, ID: str):
         with self.make_connection() as connection:
             r = connection.execute("SELECT Title FROM Posts WHERE ID=?;",(ID,))
@@ -104,15 +124,43 @@ class Comment:
         self.content = content
         self.owner = owner
         self.postid = postid
+
 class CommentManager:
     MinimumCommentLength = 10
     MAX_FEED_LENGTH = 100
+    MAX_SEARCH_RESULTS = 10
     def __init__(self, db: str, contentmanager: ContentManager):
         self.contentmanager = contentmanager
         self.db = db
         with self.make_connection() as connection:
             connection.execute("pragma journal_mode=wal;")
             connection.execute("CREATE TABLE IF NOT EXISTS Comments (PostID TEXT, CommentID TEXT, OWNER INTEGER, BODY TEXT);")
+    def __search__(self, query: str):
+        "ContentManager uses this to search comments, too. Returns list of relevant comments"
+        SearchResults = []
+        with self.make_connection() as connection:
+            sqlitequery = "%" + query + "%"
+            cursor = connection.execute("SELECT COUNT(*) FROM Comments WHERE BODY like ?;",(sqlitequery,))
+            count = cursor.fetchone()[0]
+            offset = math.floor(random.random() * count)
+            if count < CommentManager.MAX_SEARCH_RESULTS:
+                offset = 0
+            cursor = connection.execute("SELECT * FROM Comments WHERE BODY like ? LIMIT ? OFFSET ?;",(sqlitequery,CommentManager.MAX_SEARCH_RESULTS,offset))
+            results = cursor.fetchall()
+        for result in results:
+            PostID, CommentID, OWNER, BODY = result
+            SearchResult = {}
+            SearchResult["URL"] = "/post/" + PostID + "/?showComment=" + CommentID + "#" + CommentID
+            index = BODY.lower().index(query.lower())
+            startindex = index - 25
+            endindex = index + 25
+            if startindex < 0:
+                0
+            if endindex > len(BODY) - 1:
+                endindex = len(BODY) - 1
+            SearchResult["TITLE"] = BODY[startindex:endindex]
+            SearchResults.append(SearchResult)
+        return SearchResults
     def add_comment(self, Post: Post, Owner: User, Text: str) -> bool | str:
         if len(Text) < CommentManager.MinimumCommentLength:
             return "Comment is too short."
@@ -262,5 +310,6 @@ class ReportManager:
 class Report:
     def __init__(self, content: Post | Comment, reportquantity: int):
         self.content = content
+        self.typ = ReportManager.Convert_Type_To_Int(content)
         self.reportcontent = content.name if type(content) == Post else content.content
         self.reportquantity = reportquantity

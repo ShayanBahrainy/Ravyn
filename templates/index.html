@@ -23,14 +23,14 @@
         <img class="NotLoggedIn" src="/static/icons/favicon.ico" alt="Ravyn Logo">
         <button onclick="location='/login'" class="LoginButton">Log in!</button>
         {%endif%}
-        <!--<img class="SearchIcon" src="/static/icons/search.png" alt="Search" id="OpenSearch"> -->
+        <img class="SearchIcon" src="/static/icons/search.png" alt="Search" id="OpenSearch"> 
         <hr class="TopBarDivider">
     </div>
-        <!--
         <div class="SearchScreen hidden" id="SearchScreen">
-            <input class="Search" id="SearchBar" placeholder="Search">
+            <input class="Search" id="SearchBar" placeholder="Search" autocomplete="off">
+            <img class="SearchScreenIcon" src="/static/icons/searchinput.png">
+            <div class="SearchResultContainer" id="SearchResultContainer"></div>
         </div>
-        -->
         {% if feed%}
         <div class="Feed">
         {% for post in feed%}

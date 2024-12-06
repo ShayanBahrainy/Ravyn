@@ -7,7 +7,7 @@ function freeContent (id, name) {
 }
 function showContent(postid, commentid) {
     if (!commentid) {
-        window.open("/post/" + id)
+        window.open("/post/" + postid)
     }
     else {
         window.open("/post/" + postid + "/?showComment=" + commentid)

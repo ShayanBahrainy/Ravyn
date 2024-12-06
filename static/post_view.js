@@ -49,4 +49,8 @@ window.addEventListener("load", function (e) {
       }
     })
   }
+  let params = new URLSearchParams(this.location.search)
+  if (params.get("showComment") != null) {
+    this.document.getElementById(params.get("showComment")).scrollIntoView(true)
+  }
 })

@@ -31,7 +31,7 @@
         {% if Comments %}
         <div class="CommentHolder">
             {% for comment in Comments%}
-            <div class="Comment">
+            <div class="Comment" id="{{comment.id}}">
             <img src="{{comment.owner.profileimage}}" class="CommentImage ProfilePicture">
             <p class="CommentContent"> {{comment.content}}</p>
             <select class="CommentOptions" data-id="{{comment.id}}"><option selected disabled>...</option><option value="Report">Report</option></select>

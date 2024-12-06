@@ -122,8 +122,11 @@ def admin_console():
         return redirect("/")
     feed = reportmanager.get_feed()
     return render_template("admin_console.html", reports=feed,type=type,str=str)
+@app.route("/search/<Query>")
+def search_index(Query):
+    return contentmanager.search(Query, commentmanager)
 
-@app.route("/post/<PostID>")
+@app.route("/post/<PostID>/")
 def LoadPaper(PostID):
     post = contentmanager.get_post(PostID)
     if not post:
@@ -150,7 +153,6 @@ def login():
         redirect_uri=request.base_url + "google-auth",
         scope=["openid", "email", "profile"],
     )
-    print(request_uri)
     return redirect(request_uri)
 
 @app.route("/login/google-auth")

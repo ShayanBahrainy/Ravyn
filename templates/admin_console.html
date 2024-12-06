@@ -15,7 +15,12 @@
             </tr>
             {% for report in reports %}
             <tr id="{{report.content.id}}">
-                <td class="UGCData">{{report.reportcontent}}</td>
+                {% if report.typ == 0 %}
+                <td class="UGCData" onclick="showContent('{{report.content.id}}')">{{report.reportcontent}}</td>
+                {% endif %}
+                {% if report.typ == 1 %}
+                <td class="UGCData" onclick="showContent('{{report.content.postid}}','{{report.content.id}}')">{{report.reportcontent}}</td>
+                {% endif %}
                 <td><button  class="ActionButton" onclick="freeContent('{{ report.content.id }}','{{ report.reportcontent }}')">✅</button></td>
                 <td><button  class="ActionButton" onclick="deleteContent('{{ report.content.id }}', '{{ report.reportcontent}}')">❌</button></td>
             </tr>
