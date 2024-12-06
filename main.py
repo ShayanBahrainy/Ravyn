@@ -22,7 +22,7 @@ def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
 accounts = Accounts("Accounts.db", "admin.txt", BETA_ACCOUNTS)
-contentmanager = ContentManager("Posts.db", accounts)
+contentmanager = ContentManager("Posts_Recovered.db", accounts)
 commentmanager = CommentManager("Posts.db", contentmanager)
 reportmanager = ReportManager("Reports.db", contentmanager, commentmanager)
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
