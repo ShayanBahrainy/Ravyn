@@ -1,11 +1,15 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <title>{{post.name}} - Ravyn</title>
+        <link rel="shortcut icon" href="/static/icons/favicon.ico">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="'{{post.name}}' - a post by {{post.author.capitalize()}} on Ravyn.">
         <link rel="stylesheet" href="/static/post_view.css">
         <script src="/static/post_view.js"></script>
-        <div id="PostID" data-id="{{post.id}}"></div>
-        <link rel="shortcut icon" href="/static/icons/favicon.ico">
     </head>
     <body>
+        <div id="PostID" data-id="{{post.id}}" style="display: none;"></div>
         <p class="Header LargeText">{{post.name}}</p>
         <p class="Header ReallySmallText AuthorName">By {{post.author.capitalize()}}</p>
         <select title="Extra Options" id="menu" class="controlsButton menuOptions Button">
@@ -32,7 +36,7 @@
         <div class="CommentHolder">
             {% for comment in Comments%}
             <div class="Comment" id="{{comment.id}}">
-            <img src="{{comment.owner.profileimage}}" class="CommentImage ProfilePicture">
+            <img src="{{comment.owner.profileimage}}" class="CommentImage ProfilePicture" alt="{{comment.owner.name}}'s profile picture" title="{{comment.owner.name.capitalize()}}">
             <p class="CommentContent"> {{comment.content}}</p>
             <select class="CommentOptions" data-id="{{comment.id}}"><option selected disabled>...</option><option value="Report">Report</option></select>
             </div>

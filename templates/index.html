@@ -13,10 +13,16 @@
         {% if username %}
         <img src="/static/icons/newpost.png" class="NewPost" id="NewPost" alt="">
         <img class="WelcomeMessage LoggedInLogo" alt="RavynLogo" src="/static/icons/favicon.ico">
+        <div class="Notifications" id="Notifications">
+            {% if notificationcount %}
+        <div class="NotificationCount">{{notificationcount}}</div>
+        {% endif %}
+        <p class="NotificationsButton LargeText">✉️</p>
+        </div>
         {% if admin %}
         <button class="AdminButton" onclick="location='/admin/console'">⚙️</button>
         {% endif %}
-        <img src="{{picture}}" class="ProfilePicture SelfProfile" alt="">
+        <img src="{{picture}}" class="ProfilePicture SelfProfile" alt="{{username}}" title="{{username}}">
         {%endif%}
         {%if not username%}
         <p class="WelcomeMessage LargeText">Welcome!</p>
@@ -31,11 +37,15 @@
             <img class="SearchScreenIcon" src="/static/icons/searchinput.png">
             <div class="SearchResultContainer" id="SearchResultContainer"></div>
         </div>
+        <div class="NotificationScreen hidden" id="NotificationScreen">
+            <h1 class="LargeText NotificationHeader">Notifications</h1>
+            <div id="NotificationResults" class="NotificationResults"></div>
+        </div>
         {% if feed%}
         <div class="Feed">
         {% for post in feed%}
             <div class="Post" onclick="location='/post/{{post.id}}'">
-                <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile ProfilePicture" alt="">
+                <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile ProfilePicture" alt="{{post.author}}'s profile" title="{{post.author.capitalize()}}">
                 <p class="PostTitle SmallText ">{{post.name.capitalize()}}</p>
                 {% if post.showmore %}
                 <p class="SmallText PostContent ShowMore">{{post.contentpreview}}  

@@ -9,3 +9,6 @@ Posts.db-shm
 Post.db-wal
 Accounts.db-shm
 Accounts.db-wal
+Notifications.db
+Notifications.db-shm
+Notifications.db-wal

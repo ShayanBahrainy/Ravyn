@@ -14,8 +14,9 @@ class User:
         del self.accounts[self.cookie]
 class UserPublicFace:
     "Public Facing User Object"
-    def __init__(self, name: str, profileimage: str):
+    def __init__(self, name: str, profileimage: str, id: int):
         self.name = name
+        self.id = id
         self.profileimage = profileimage
 class Accounts:
     def __init__(self, db: str, admin_file: str, beta_users: os.PathLike=None):
@@ -34,10 +35,10 @@ class Accounts:
     def get_public_face(self, id):
         "Returns tuple where first object is account's username, second is picture url."
         with self.make_connection() as connection:
-            r = connection.execute("SELECT USERNAME,PICTURE FROM Accounts WHERE ID = ?;", (id,))
+            r = connection.execute("SELECT USERNAME,PICTURE,ID FROM Accounts WHERE ID = ?;", (id,))
             result = r.fetchone()
             if result:
-                return UserPublicFace(result[0],result[1])
+                return UserPublicFace(result[0],result[1],result[2])
         return False
     def make_connection(self):
         return sqlite3.connect(self.db)

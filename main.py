@@ -8,6 +8,8 @@ from Content import ContentManager, Post, ReportManager, CommentManager, Comment
 
 from oauthlib.oauth2 import WebApplicationClient
 
+from Notifications import NotificationManager
+
 
 with open("Client.id") as f:
     GOOGLE_CLIENT_ID = f.read().strip()
@@ -22,25 +24,44 @@ def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
 accounts = Accounts("Accounts.db", "admin.txt", BETA_ACCOUNTS)
-contentmanager = ContentManager("Posts_Recovered.db", accounts)
-commentmanager = CommentManager("Posts.db", contentmanager)
+contentmanager = ContentManager("Posts.db", accounts)
+notificationmanager = NotificationManager("Notifications.db")
+commentmanager = CommentManager("Posts.db", contentmanager, notificationmanager)
 reportmanager = ReportManager("Reports.db", contentmanager, commentmanager)
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1000 * 1000
-app.config['UPLOAD_FOLDER'] = "Papers"
-app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
 
 @app.route("/")
 def index():
     if request.cookies.__contains__("AUTH"):
         user = accounts.is_logged_in(request.cookies["AUTH"])
         if user:
-            return render_template("index.html",username=user.username, picture=user.picture, feed=contentmanager.get_feed(),admin=user.admin)
+            notificationcount = notificationmanager.get_notification_count(user)
+            if notificationcount > 8:
+                notificationcount = "9+"
+            if notificationcount == 0:
+                notificationcount = None
+            return render_template("index.html",username=user.username, picture=user.picture, feed=contentmanager.get_feed(),admin=user.admin,notificationcount=notificationcount)
     return render_template("index.html",username=False, feed=contentmanager.get_feed())
-
+@app.route("/notifications/")
+def notification_index():
+    if request.cookies.__contains__("AUTH"):
+        user = accounts.is_logged_in(request.cookies["AUTH"])
+        if user:
+            data = notificationmanager.get_feed(user, commentmanager)
+            response = Response(data, content_type="application/json")
+            return response
+    return abort(403)
+@app.route("/notifications/clear/<ContentID>", methods=["POST"])
+def clear_notification(ContentID):
+    if request.cookies.__contains__("AUTH"):
+        user = accounts.is_logged_in(request.cookies["AUTH"])
+        if user:
+            notificationmanager.clear_notification(user, ContentID)
+            return 'Success!'
+    return abort(403) 
 @app.route("/post/", methods=["GET","POST"])
 def newPostPage():
     if not request.cookies.__contains__("AUTH"):

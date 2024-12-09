@@ -6,14 +6,16 @@ import math
 import json
 
 from Accounts import Accounts, User, UserPublicFace
+from Notifications import NotificationManager
 
 class Post:
     ContentPreviewMaxLength = 150
-    def __init__(self, id: str, name: str, author: int, authorprofile: str, content: str, comments: list['Comment']=[]):
+    def __init__(self, id: str, name: str, authorid: int, author: str, authorprofile: str, content: str, comments: list['Comment']=[]):
         self.id = id
         self.name = name
         self.author = author
         self.authorprofile = authorprofile
+        self.authorid = authorid
         self.content = content
         self.showmore = len(content) > Post.ContentPreviewMaxLength
         if len(content) > Post.ContentPreviewMaxLength:
@@ -90,7 +92,7 @@ class ContentManager:
             posts = r.fetchall()
             for post in posts:
                 user = self.accounts.get_public_face(post[2])
-                results.append(Post(post[0], post[4], user.name, user.profileimage, post[3]))
+                results.append(Post(post[0], post[4], user.id, user.name, user.profileimage, post[3]))
         return results
     def get_post(self, id: str):
         if not self.validate_post_for_showing(id):
@@ -99,7 +101,7 @@ class ContentManager:
             cursor = connection.execute("SELECT ID, TITLE, OWNER, BODY FROM Posts WHERE ID=?;",(id,))
             r = cursor.fetchone()
         user = self.accounts.get_public_face(r[2])
-        return Post(r[0], r[1], user.name, user.profileimage, r[3])
+        return Post(r[0], r[1], user.id, user.name, user.profileimage, r[3])
     
     def create_post(self, title: str, body: str, user_id: int):
         if len(body) < ContentManager.MIN_BODY_LENGTH:
@@ -129,8 +131,9 @@ class CommentManager:
     MinimumCommentLength = 10
     MAX_FEED_LENGTH = 100
     MAX_SEARCH_RESULTS = 10
-    def __init__(self, db: str, contentmanager: ContentManager):
+    def __init__(self, db: str, contentmanager: ContentManager, notificationmanager: NotificationManager):
         self.contentmanager = contentmanager
+        self.notificationmanager = notificationmanager
         self.db = db
         with self.make_connection() as connection:
             connection.execute("pragma journal_mode=wal;")
@@ -167,6 +170,7 @@ class CommentManager:
         with self.make_connection() as connection:
             id = str(uuid.uuid4())
             connection.execute("INSERT INTO Comments (PostID, CommentID, OWNER, BODY) VALUES (?,?,?,?);",(Post.id, id, Owner.id, Text,))
+        self.notificationmanager.__add_comment__(Post.authorid,id)
         return True
     def get_comments(self, postid: str):
         comments = []

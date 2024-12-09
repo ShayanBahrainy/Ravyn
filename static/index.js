@@ -7,12 +7,8 @@ class Search {
         this.SearchTimerId = 0
         this.searchInterval = 500
         SearchInput.addEventListener("input", this)
-        document.addEventListener("keydown", this)
     }
     handleEvent(ev) {
-        if (ev.type == "keydown" && ev.key == "Escape") {
-            document.getElementById("SearchScreen").className = "SearchScreen hidden"
-        }
         if (ev.type != "input") {
             return
         }
@@ -66,12 +62,71 @@ class Search {
     }
 
 }
+function clearNotification(id) {
+    fetch("/notifications/clear/" + id, {method:"POST",credentials:"same-origin"})
+}
+function renderNotifications(data) {
+    for (let notification of data["Notifications"]){
+        let NotificationContainer = document.createElement("div")
+        NotificationContainer.className = "NotificationContainer"
+        let p  = document.createElement("p")
+        p.innerText = notification["TITLE"]
+        p.className = "NotificationResult"
+        p.addEventListener("click", function () {
+            window.open(notification["HREF"])
+        })
+        let deleteNotification = document.createElement("input")
+        deleteNotification.type = "checkbox"
+        deleteNotification.className = "ClearNotification"
+        deleteNotification.addEventListener("click", function () {
+            clearNotification(notification["ID"])
+            NotificationContainer.remove()
+        })
+        NotificationContainer.appendChild(deleteNotification)
+        NotificationContainer.appendChild(p)
+        document.getElementById("NotificationResults").appendChild(NotificationContainer)
+    }
+    if (data["Notifications"].length == 0) {
+        let p  = document.createElement("p")
+        p.innerText = "No notifications :)"
+        p.className = "NoNotificationResult"
+        p.addEventListener("click", function () {
+            closeScreens()
+        })
+        let NotificationContainer = document.createElement("div")
+        NotificationContainer.className = "NotificationContainer"
+        NotificationContainer.appendChild(p)
+        document.getElementById("NotificationResults").appendChild(NotificationContainer)
+    }
+}
+function requestCallBack(R) {
+    R.json().then(renderNotifications)
+}
+function OpenNotifications () {
+    let notificationscreen = document.getElementById("NotificationScreen")
+    notificationscreen.className = "NotificationScreen"
+    let notificationresults = document.getElementById("NotificationResults")
+    notificationresults.innerHTML = ""
+    fetch("/notifications/", {method:"GET", credentials:"same-origin"}).then(requestCallBack)
+}
+function closeScreens() {
+    document.getElementById("NotificationScreen").className = "NotificationScreen hidden"
+    document.getElementById("SearchScreen").className = "SearchScreen hidden"
+}
+document.addEventListener("keydown", function(ev) {
+    if (ev.key == "Escape") {
+        closeScreens()
+    }
+})
 window.addEventListener("load", function () {
     let search = new Search(this.document.getElementById("SearchBar"))
     if (this.document.getElementById("NewPost")) {
         this.document.getElementById("NewPost").addEventListener("click", function () {
             location = "/post/"
         })
+    }
+    if (this.document.getElementById("Notifications")) {
+        this.document.getElementById("Notifications").addEventListener("click", OpenNotifications)
     }
     this.document.getElementById("OpenSearch").addEventListener("click", OpenSearch)
 })
