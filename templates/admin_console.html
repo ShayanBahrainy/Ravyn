@@ -21,8 +21,8 @@
                 {% if report.typ == 1 %}
                 <td class="UGCData" onclick="showContent('{{report.content.postid}}','{{report.content.id}}')">{{report.reportcontent}}</td>
                 {% endif %}
-                <td><button  class="ActionButton" onclick="freeContent('{{ report.content.id }}','{{ report.reportcontent }}')">✅</button></td>
-                <td><button  class="ActionButton" onclick="deleteContent('{{ report.content.id }}', '{{ report.reportcontent}}')">❌</button></td>
+                <td><button  class="ActionButton" onclick='freeContent("{{ report.content.id }}",{{ report.reportcontent|tojson}})'>✅</button></td>
+                <td><button  class="ActionButton" onclick='deleteContent("{{ report.content.id }}",{{ report.reportcontent|tojson}})'>❌</button></td>
             </tr>
             {% endfor %}
         </table>

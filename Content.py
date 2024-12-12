@@ -4,6 +4,7 @@ import hashlib
 import random
 import math
 import json
+import time
 
 from Accounts import Accounts, User, UserPublicFace
 from Notifications import NotificationManager
@@ -88,7 +89,7 @@ class ContentManager:
             offset = math.floor(random.random() * count) 
             if count < ContentManager.MAX_FEED_LENGTH:
                 offset = 0
-            r = connection.execute("SELECT * FROM Posts LIMIT ? OFFSET ?;",(ContentManager.MAX_FEED_LENGTH, offset))
+            r = connection.execute("SELECT * FROM Posts ORDER BY TIME DESC LIMIT ? OFFSET ?;",(ContentManager.MAX_FEED_LENGTH, offset))
             posts = r.fetchall()
             for post in posts:
                 user = self.accounts.get_public_face(post[2])
@@ -115,7 +116,7 @@ class ContentManager:
             if r.fetchone() == (1,):
                 return "Post already exists"
             id = str(uuid.uuid4())
-            r = connection.execute("INSERT INTO Posts (ID, VIEWS, OWNER, BODY, TITLE) VALUES (?,?,?,?,?);", (id, 0, user_id, body, title,))
+            r = connection.execute("INSERT INTO Posts (ID, TIME, OWNER, BODY, TITLE) VALUES (?,?,?,?,?);", (id, int(time.time()), user_id, body, title,))
         return True
     def delete_post(self, id: str):
         with self.make_connection() as connection:
@@ -219,6 +220,7 @@ class CommentManager:
         owner = self.contentmanager.accounts.get_public_face(owner)
         return Comment(commentid, content, owner, postid)
     def delete_comment(self, Comment: Comment):
+        self.notificationmanager.delete_comment(Comment)
         with self.make_connection() as connection:
             connection.execute("DELETE FROM Comments WHERE CommentID=?;",(Comment.id,))
     def make_connection(self):
@@ -312,8 +314,12 @@ class ReportManager:
         if Type == Comment:
             return self.commentmanager.get_comment(contentid)
 class Report:
+    MaxReportContent = 50
     def __init__(self, content: Post | Comment, reportquantity: int):
         self.content = content
         self.typ = ReportManager.Convert_Type_To_Int(content)
         self.reportcontent = content.name if type(content) == Post else content.content
+        if len(self.reportcontent) > Report.MaxReportContent:
+            self.reportcontent = self.reportcontent[:Report.MaxReportContent + 1]
+        self.reportcontent.replace("\n","")
         self.reportquantity = reportquantity

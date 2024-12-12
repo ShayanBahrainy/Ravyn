@@ -16,7 +16,9 @@ class NotificationManager:
 
     def make_connection(self):
         return sqlite3.connect(self.db)
-    
+    def delete_comment(self, Comment: 'Content.Comment'):
+        with self.make_connection() as connection:
+            connection.execute("DELETE FROM Notifications WHERE CONTENTID=?;",(Comment.id,))
     def __add_comment__(self, UserID: int, CommentID: str):
         with self.make_connection() as connection:
             cursor = connection.execute("SELECT EXISTS (SELECT * FROM Notifications WHERE USERID=? AND CONTENTID=?);",(UserID, CommentID))
