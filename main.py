@@ -1,3 +1,4 @@
+import datetime
 from flask import *
 import os
 import sqlite3
@@ -8,13 +9,15 @@ from Content import ContentManager, Post, ReportManager, CommentManager, Comment
 
 from oauthlib.oauth2 import WebApplicationClient
 
-from Notifications import NotificationManager
+from DatabaseHandler import DatabaseHandler
+from Notifications import NotificationManager, ViewedManager
 
 
 with open("Client.id") as f:
     GOOGLE_CLIENT_ID = f.read().strip()
 with open("Client.secret") as f:
     GOOGLE_CLIENT_SECRET = f.read().strip()
+DEVELOPMENT = bool(os.environ.get("RAVYN_DEVELOPMENT_MODE"))
 
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
@@ -23,11 +26,14 @@ BETA_ACCOUNTS = None
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
-accounts = Accounts("Accounts.db", "admin.txt", BETA_ACCOUNTS)
-contentmanager = ContentManager("Posts.db", accounts)
-notificationmanager = NotificationManager("Notifications.db")
-commentmanager = CommentManager("Posts.db", contentmanager, notificationmanager)
-reportmanager = ReportManager("Reports.db", contentmanager, commentmanager)
+databasehandler = DatabaseHandler()
+
+accounts = Accounts(databasehandler, "Accounts.db", "admin.txt", BETA_ACCOUNTS)
+viewmanager = ViewedManager(databasehandler, "Viewed.db")
+contentmanager = ContentManager(databasehandler, "Posts.db", accounts, viewmanager)
+notificationmanager = NotificationManager(databasehandler, "Notifications.db")
+commentmanager = CommentManager(databasehandler, "Posts.db", contentmanager, notificationmanager)
+reportmanager = ReportManager(databasehandler, "Reports.db", contentmanager, commentmanager)
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 app = Flask(__name__)
@@ -43,7 +49,7 @@ def index():
                 notificationcount = "9+"
             if notificationcount == 0:
                 notificationcount = None
-            return render_template("index.html",username=user.username, picture=user.picture, feed=contentmanager.get_feed(),admin=user.admin,notificationcount=notificationcount)
+            return render_template("index.html",username=user.username, picture=user.picture, feed=contentmanager.get_feed(user),admin=user.admin,notificationcount=notificationcount)
     return render_template("index.html",username=False, feed=contentmanager.get_feed())
 @app.route("/notifications/")
 def notification_index():
@@ -160,6 +166,10 @@ def LoadPaper(PostID):
         else:
             commentSuccess = 1
     Comments = commentmanager.get_feed(PostID,start_at=request.args.get("showComment"))
+    if request.cookies.__contains__("AUTH"):
+       user = accounts.is_logged_in(request.cookies["AUTH"])
+       if user:
+           viewmanager.has_viewed(user, post) 
     return render_template("post_view.html", post=post, PostID=PostID, Comments=Comments, commentSuccess=commentSuccess)
 
 @app.route("/login/")
@@ -212,7 +222,11 @@ def googleauth():
         return r
     else:
         return "User email not available or not verified by Google.", 400
-    
+
+@app.teardown_request
+def teardown(response):
+    databasehandler.request_finished(request)
+
 @app.route("/privacy-policy")
 def privacypolicy():
     return privacypolicy
@@ -223,4 +237,6 @@ def tos():
 @app.errorhandler(requests.exceptions.ConnectionError)
 def backend_connection_error():
     return 
-app.run(port=443,ssl_context="adhoc", debug=False)
+
+if DEVELOPMENT:
+    app.run(port=443,ssl_context="adhoc", debug=False)

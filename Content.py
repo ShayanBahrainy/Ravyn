@@ -5,9 +5,11 @@ import random
 import math
 import json
 import time
+from flask import request
 
 from Accounts import Accounts, User, UserPublicFace
-from Notifications import NotificationManager
+from DatabaseHandler import DatabaseHandler
+from Notifications import NotificationManager, ViewedManager
 
 class Post:
     ContentPreviewMaxLength = 150
@@ -30,15 +32,17 @@ class ContentManager:
     MIN_BODY_LENGTH = 100
     MAX_FEED_LENGTH = 10
     MAX_SEARCH_RESULTS = 10
-    def __init__(self, db, accounts: Accounts):
-        self.db = db
+    def __init__(self, dbhandler: DatabaseHandler, db: str, accounts: Accounts, viewmanager: ViewedManager):
+        self.dbhandler = dbhandler
+        self.dbhandler.register_database(db, ContentManager)
         self.accounts = accounts
-        with self.make_connection() as connection:
+        self.viewmanager = viewmanager
+        with dbhandler.get_stateless_connection(ContentManager) as connection:
             connection.execute("pragma journal_mode=wal;")
-            connection.execute("CREATE TABLE IF NOT EXISTS Posts (ID TEXT, VIEWS INTEGER, OWNER INTEGER, BODY TEXT, TITLE TEXT);")
+            connection.execute("CREATE TABLE IF NOT EXISTS Posts (ID TEXT, TIME INTEGER, OWNER INTEGER, BODY TEXT, TITLE TEXT);")
     
     def make_connection(self):
-        return sqlite3.connect(self.db)
+        return self.dbhandler.get_connection(request, ContentManager)
     def search(self, query: str, commentmanager: 'CommentManager'):
         SearchResults = []
         with self.make_connection() as connection:
@@ -78,7 +82,7 @@ class ContentManager:
             return True
         return False
     
-    def get_feed(self):
+    def get_feed(self, User: User=None):
         results = []
         with self.make_connection() as connection:
             r = connection.execute("SELECT COUNT(*) FROM Posts;")
@@ -91,9 +95,12 @@ class ContentManager:
                 offset = 0
             r = connection.execute("SELECT * FROM Posts ORDER BY TIME DESC LIMIT ? OFFSET ?;",(ContentManager.MAX_FEED_LENGTH, offset))
             posts = r.fetchall()
-            for post in posts:
-                user = self.accounts.get_public_face(post[2])
-                results.append(Post(post[0], post[4], user.id, user.name, user.profileimage, post[3]))
+            for postdata in posts:
+                user = self.accounts.get_public_face(postdata[2])
+                post = Post(postdata[0], postdata[4], user.id, user.name, user.profileimage, postdata[3])
+                results.append(post)
+                if User:
+                    print(self.viewmanager.has_viewed(User, post))
         return results
     def get_post(self, id: str):
         if not self.validate_post_for_showing(id):
@@ -132,11 +139,12 @@ class CommentManager:
     MinimumCommentLength = 10
     MAX_FEED_LENGTH = 100
     MAX_SEARCH_RESULTS = 10
-    def __init__(self, db: str, contentmanager: ContentManager, notificationmanager: NotificationManager):
+    def __init__(self, dbhandler: DatabaseHandler, db: str, contentmanager: ContentManager, notificationmanager: NotificationManager):
         self.contentmanager = contentmanager
         self.notificationmanager = notificationmanager
-        self.db = db
-        with self.make_connection() as connection:
+        self.dbhandler = dbhandler
+        dbhandler.register_database(db, CommentManager)
+        with dbhandler.get_stateless_connection(CommentManager) as connection:
             connection.execute("pragma journal_mode=wal;")
             connection.execute("CREATE TABLE IF NOT EXISTS Comments (PostID TEXT, CommentID TEXT, OWNER INTEGER, BODY TEXT);")
     def __search__(self, query: str):
@@ -224,15 +232,16 @@ class CommentManager:
         with self.make_connection() as connection:
             connection.execute("DELETE FROM Comments WHERE CommentID=?;",(Comment.id,))
     def make_connection(self):
-        return sqlite3.connect(self.db)
+        return self.dbhandler.get_connection(request, CommentManager)
 class ReportManager:
     MAX_FEED_LENGTH = 25
-    def __init__(self, db: str, contentmanager: ContentManager, commentmanager: CommentManager):
-        self.db = db
+    def __init__(self, dbhandler: DatabaseHandler, db: str, contentmanager: ContentManager, commentmanager: CommentManager):
+        self.dbhandler = dbhandler
+        dbhandler.register_database(db, ReportManager)
         self.contentmanager = contentmanager
         self.commentmanager = commentmanager
         #In DB, type 0 means post, type 1 means comment
-        with self.make_connection() as connection:
+        with dbhandler.get_stateless_connection(ReportManager) as connection:
             connection.execute("pragma journal_mode=wal;")
             connection.execute("CREATE TABLE IF NOT EXISTS Reports (CONTENTID TEXT, TYPE INTEGER, USERID INTEGER);")
 
@@ -279,7 +288,7 @@ class ReportManager:
             return Comment
         return Post
     def make_connection(self):
-        return sqlite3.connect(self.db)
+        return self.dbhandler.get_connection(request, ReportManager)
     def get_report_count(self, content: Post | Comment):
         Type = ReportManager.Convert_Type_To_Int(content)
         with self.make_connection() as connection:

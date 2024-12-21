@@ -1,5 +1,7 @@
 import sqlite3
 import os
+from flask import request
+from DatabaseHandler import DatabaseHandler
 
 class User:
     def __init__(self, accounts: 'Accounts', id, username, email, picture, cookie):
@@ -19,10 +21,11 @@ class UserPublicFace:
         self.id = id
         self.profileimage = profileimage
 class Accounts:
-    def __init__(self, db: str, admin_file: str, beta_users: os.PathLike=None):
+    def __init__(self, dbhandler: DatabaseHandler, db: str, admin_file: str, beta_users: os.PathLike=None):
         "IF beta_users is passed, beta user emails will be loaded from text file and no one else can sign in."
-        self.db = db
-        with self.make_connection() as connection:
+        self.dbhandler = dbhandler
+        self.dbhandler.register_database(db, Accounts)
+        with dbhandler.get_stateless_connection(Accounts) as connection:
             connection.execute("pragma journal_mode=wal;")
             connection.execute("CREATE TABLE IF NOT EXISTS Accounts (ID INTEGER, USERNAME TEXT, EMAIL TEXT, PICTURE TEXT);")
         self.transactionstack = []
@@ -39,9 +42,10 @@ class Accounts:
             result = r.fetchone()
             if result:
                 return UserPublicFace(result[0],result[1],result[2])
+        print(connection)
         return False
     def make_connection(self):
-        return sqlite3.connect(self.db)
+        return self.dbhandler.get_connection(request, Accounts)
     def create_account(self, ID, USERNAME, EMAIL, PICTURE): 
         with self.make_connection() as connection:   
             connection.execute("INSERT INTO Accounts (ID, USERNAME, EMAIL, PICTURE) VALUES (?,?,?,?);",(ID,USERNAME,EMAIL,PICTURE,))
