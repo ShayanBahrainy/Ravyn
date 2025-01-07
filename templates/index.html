@@ -22,7 +22,7 @@
         {% if admin %}
         <button class="AdminButton" onclick="location='/admin/console'">⚙️</button>
         {% endif %}
-        <img src="{{picture}}" class="ProfilePicture SelfProfile" alt="{{username}}" title="{{username}}">
+        <img src="{{picture}}" class="ProfilePicture SelfProfile" alt="{{username}}" title="{{username}}" href="/profile/{{userid}}">
         {%endif%}
         {%if not username%}
         <p class="WelcomeMessage LargeText">Welcome!</p>
@@ -42,10 +42,10 @@
             <div id="NotificationResults" class="NotificationResults"></div>
         </div>
         {% if feed%}
-        <div class="Feed">
+        <div class="Feed" id="Feed">
         {% for post in feed%}
-            <div class="Post" onclick="location='/post/{{post.id}}'">
-                <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile ProfilePicture" alt="{{post.author}}'s profile" title="{{post.author.capitalize()}}">
+            <div class="Post" data-post-id="{{post.id}}">
+                <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile ProfilePicture" alt="{{post.author}}'s profile" title="{{post.author.capitalize()}}" data-user-id="{{post.authorid}}">
                 <p class="PostTitle SmallText ">{{post.name.capitalize()}}</p>
                 {% if post.showmore %}
                 <p class="SmallText PostContent ShowMore">{{post.contentpreview}}  

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="/static/profile.css">
+        <script src="/static/profile.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="{{User.name.capitalize()}}'s profile on Ravyn. A great social platform Aurorii built to be friendly.">
+        <link rel="shortcut icon" href="/static/icons/favicon.ico">
+        <title>{{User.name.capitalize()}} - Ravyn</title>
+    </head>
+    <body class="Body">
+        <button id="backButton" class="backButton LargeText">←</button>
+        <img class="MainProfilePicture ProfilePicture" src="{{User.profileimage}}">
+        <h1 class="ProfileName LargeText">{{User.name.capitalize()}}</h1>
+        <div class="ProfileStats">
+        <hr class="ProfileStatsDivider">
+        <p class="ProfileBar">{{content_counts["posts"]}} Posts • {{content_counts["comments"]}} Comments</p>
+        <hr class="ProfileStatsDivider">
+        </div>
+        <div class="ProfileControls">
+            <button class="PreviousPage Button LargeText" id="BackButton">←</button>
+            <p class="PageNumber LargeText" id="PageNumber"></p>
+            <button class="NextPage Button LargeText" id="NextButton">→</button>
+        </div>
+        <div class="PostsContainer">
+                {% for post in posts%}
+                    <div class="Post" onclick="location='/post/{{post.id}}'">
+                        <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile ProfilePicture" alt="{{post.author}}'s profile" title="{{post.author.capitalize()}}">
+                        <p class="PostTitle SmallText ">{{post.name.capitalize()}}</p>
+                        {% if post.showmore %}
+                        <p class="SmallText PostContent ShowMore">{{post.contentpreview}}  
+                        {% else %}
+                        <p class="SmallText PostContent">{{post.contentpreview}}  
+                        {% endif %}
+                    </div>
+                {%endfor%}
+        </div>
+    </body>
+</html>

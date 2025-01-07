@@ -1,0 +1,109 @@
+@import url("/static/base.css");
+.MainProfilePicture {
+    width: 12.5%;
+    position: absolute;
+    left: 32.5%;
+    display: inline;
+}
+.ProfileName {
+    position: absolute;
+    left: 47%;
+    top: 5%;
+    width: 5%;
+}
+.ProfileBar {
+    margin: 0%;
+    top: 0%;
+    white-space: nowrap;
+}
+.ProfileStats{
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    top: 45%;
+    width: 100%;
+}
+.ProfileStatsDivider {
+    color: var(--MainColor);
+    border-width: 2px;
+    border-style: solid;
+    width: 35%;
+    height: 100%;
+}
+.PostsContainer {
+    position: absolute;
+    top: 60%;
+    left: 25%;
+    width: 50%;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 1em;
+    z-index: 1;
+}
+.Post {
+    border-style: solid;
+    background-color: var(--SideColor);
+    color: var(--LightTextColor);
+    border-color: var(--MainColor);
+    padding: .5%;
+    min-width: 10%;
+    width: 60%;
+    position: relative;
+    left: 25%;
+    z-index: 2;
+}
+.AuthorProfile {
+    height: 15%;
+    position: relative;
+    width: 5%;
+    display: inline;
+    padding: 0px;
+    margin: 0px;
+}
+.ShowMore:after {
+    content: 'Read More';
+    color: var(--GreyColor);
+    display: inline-block;
+}
+.Post:hover {
+    background-color: var(--LightSideColor);
+}
+.NextPage {
+    position: absolute;
+    top: 52%;
+    left: 52.5%;
+    display: inline;
+    background-color: var(--SideColor);
+}
+.PageNumber {
+    position: absolute;
+    top: 52%;
+    left: 50%;  
+    display: inline; 
+    margin: 0%;
+}
+.PreviousPage {
+    position: absolute;
+    top: 52%;
+    left: 42.5%;
+    display: inline;
+    background-image: url("/static/icons/backward.png");
+}
+.PreviousPage:hover,.NextPage:hover {
+    color: var(--GreyColor);
+}
+.backButton {
+    display: inline-block;
+    position: absolute;
+    left: 5%;
+    top: 0%;
+    border: none;
+    width: 8%;
+    height: 4%;
+    background: none;
+}
+.backButton:hover {
+    color: var(--GreyColor);
+}

@@ -113,6 +113,24 @@ function closeScreens() {
     document.getElementById("NotificationScreen").className = "NotificationScreen hidden"
     document.getElementById("SearchScreen").className = "SearchScreen hidden"
 }
+function addProfileLinks() {
+    let profilepictures = this.document.getElementsByClassName("AuthorProfile")
+    for (let profilepicture of profilepictures) {
+        profilepicture.addEventListener("click",function (ev){ 
+            location='/profile/' + profilepicture.dataset.userId
+            ev.stopPropagation()
+        })
+    }
+}
+function addPostLinks() {
+    let posts = this.document.getElementById("Feed").children
+    for (let post of posts) {
+        post.addEventListener("click", function () {
+            location="/post/" + post.dataset.postId
+            ev.stopPropagation()
+        })
+    }
+}
 document.addEventListener("keydown", function(ev) {
     if (ev.key == "Escape") {
         closeScreens()
@@ -129,4 +147,6 @@ window.addEventListener("load", function () {
         this.document.getElementById("Notifications").addEventListener("click", OpenNotifications)
     }
     this.document.getElementById("OpenSearch").addEventListener("click", OpenSearch)
+    addProfileLinks()
+    addPostLinks()
 })

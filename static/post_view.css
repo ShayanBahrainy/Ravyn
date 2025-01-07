@@ -118,3 +118,6 @@ body {
     overflow-wrap: anywhere;
     text-wrap: wrap;
 }
+.backButton:hover {
+    color: var(--GreyColor);
+}

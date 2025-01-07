@@ -49,7 +49,7 @@ def index():
                 notificationcount = "9+"
             if notificationcount == 0:
                 notificationcount = None
-            return render_template("index.html",username=user.username, picture=user.picture, feed=contentmanager.get_feed(user),admin=user.admin,notificationcount=notificationcount)
+            return render_template("index.html",username=user.username, picture=user.picture, feed=contentmanager.get_feed(user),admin=user.admin,notificationcount=notificationcount,userid=user.id)
     return render_template("index.html",username=False, feed=contentmanager.get_feed())
 @app.route("/notifications/")
 def notification_index():
@@ -68,6 +68,19 @@ def clear_notification(ContentID):
             notificationmanager.clear_notification(user, ContentID)
             return 'Success!'
     return abort(403) 
+@app.route("/profile/<UserID>")
+def profile_page(UserID):
+    user = accounts.get_public_face(UserID)
+    if not user:
+        abort(404)
+    content_counts = contentmanager.get_content_count(user, commentmanager)
+    page = request.args.get("page",0)
+    try:
+        page = int(page)
+    except:
+        page = 0
+    posts = contentmanager.get_posts(user, page)
+    return render_template("profile.html",User=user,content_counts=content_counts,posts=posts)
 @app.route("/post/", methods=["GET","POST"])
 def newPostPage():
     if not request.cookies.__contains__("AUTH"):
@@ -169,7 +182,7 @@ def LoadPaper(PostID):
     if request.cookies.__contains__("AUTH"):
        user = accounts.is_logged_in(request.cookies["AUTH"])
        if user:
-           viewmanager.has_viewed(user, post) 
+           viewmanager.viewed(user, post) 
     return render_template("post_view.html", post=post, PostID=PostID, Comments=Comments, commentSuccess=commentSuccess)
 
 @app.route("/login/")
@@ -239,4 +252,4 @@ def backend_connection_error():
     return 
 
 if DEVELOPMENT:
-    app.run(port=443,ssl_context="adhoc", debug=False)
+    app.run(port=443,ssl_context="adhoc", debug=True)

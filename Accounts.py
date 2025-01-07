@@ -36,13 +36,12 @@ class Accounts:
             with open(beta_users) as f:
                 self.beta_users = f.read().split("\n")
     def get_public_face(self, id):
-        "Returns tuple where first object is account's username, second is picture url."
+        "Returns UserPublicFace; info about a User anyone can access."
         with self.make_connection() as connection:
             r = connection.execute("SELECT USERNAME,PICTURE,ID FROM Accounts WHERE ID = ?;", (id,))
             result = r.fetchone()
             if result:
                 return UserPublicFace(result[0],result[1],result[2])
-        print(connection)
         return False
     def make_connection(self):
         return self.dbhandler.get_connection(request, Accounts)

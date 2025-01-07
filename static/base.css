@@ -28,7 +28,7 @@
 }
 .LargeText {
     color: var(--MainColor);
-    font-size: 3em;
+    font-size: 3vw;
 }
 .Button {
     border: none;

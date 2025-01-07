@@ -1,4 +1,3 @@
-import sqlite3
 import uuid
 import hashlib
 import random
@@ -32,6 +31,10 @@ class ContentManager:
     MIN_BODY_LENGTH = 100
     MAX_FEED_LENGTH = 10
     MAX_SEARCH_RESULTS = 10
+    ProfilePostsLength = 20
+    FeedQuery = """
+    SELECT * FROM Posts WHERE ID NOT IN ({bindings}) ORDER BY TIME DESC LIMIT ? OFFSET ?;
+    """
     def __init__(self, dbhandler: DatabaseHandler, db: str, accounts: Accounts, viewmanager: ViewedManager):
         self.dbhandler = dbhandler
         self.dbhandler.register_database(db, ContentManager)
@@ -43,6 +46,26 @@ class ContentManager:
     
     def make_connection(self):
         return self.dbhandler.get_connection(request, ContentManager)
+    def get_content_count(self, User: User | UserPublicFace, commentmanager: 'CommentManager') -> dict:
+        connection = self.make_connection()
+        cursor = connection.execute("SELECT COUNT(*) FROM Posts WHERE OWNER=?;",(User.id,))
+        post_count = cursor.fetchone()[0]
+        count = {
+            "posts" : post_count,
+            "comments" : commentmanager.get_comment_count(User)
+        }
+        return count
+    def get_posts(self, User: User | UserPublicFace, Page: int):
+        connection = self.make_connection()
+        offset = ContentManager.ProfilePostsLength * Page
+        limit = ContentManager.ProfilePostsLength
+        cursor = connection.execute("SELECT * FROM Posts WHERE OWNER=? LIMIT ? OFFSET ?;",(User.id,limit,offset))
+        results =  []
+        for postdata in cursor.fetchall():
+            user = self.accounts.get_public_face(postdata[2])
+            post = Post(postdata[0], postdata[4], user.id, user.name, user.profileimage, postdata[3])
+            results.append(post)
+        return results
     def search(self, query: str, commentmanager: 'CommentManager'):
         SearchResults = []
         with self.make_connection() as connection:
@@ -61,7 +84,7 @@ class ContentManager:
             SearchResult["TITLE"] = TITLE
             SearchResults.append(SearchResult)
         data = {}
-        data["Results"] = SearchResults.__add__(commentmanager.__search__(query))
+        data["Results"] = SearchResults.__add__(commentmanager.search(query))
         return json.dumps(data)
     def get_title(self, ID: str):
         with self.make_connection() as connection:
@@ -93,14 +116,17 @@ class ContentManager:
             offset = math.floor(random.random() * count) 
             if count < ContentManager.MAX_FEED_LENGTH:
                 offset = 0
-            r = connection.execute("SELECT * FROM Posts ORDER BY TIME DESC LIMIT ? OFFSET ?;",(ContentManager.MAX_FEED_LENGTH, offset))
+            ids = self.viewmanager.has_viewed_ids(User) if User else ()
+            r = connection.execute(ContentManager.FeedQuery.format(bindings=', '.join(['?'] * len(ids))),ids + (ContentManager.MAX_FEED_LENGTH, offset))
             posts = r.fetchall()
+            ids = tuple([post[0] for post in posts])
+            if User and len(posts) < ContentManager.MAX_FEED_LENGTH:
+                r = connection.execute(ContentManager.FeedQuery.format(bindings=', '.join(['?'] * len(ids))),ids + (ContentManager.MAX_FEED_LENGTH, offset))
+            posts += r.fetchall()
             for postdata in posts:
                 user = self.accounts.get_public_face(postdata[2])
                 post = Post(postdata[0], postdata[4], user.id, user.name, user.profileimage, postdata[3])
                 results.append(post)
-                if User:
-                    print(self.viewmanager.has_viewed(User, post))
         return results
     def get_post(self, id: str):
         if not self.validate_post_for_showing(id):
@@ -147,7 +173,7 @@ class CommentManager:
         with dbhandler.get_stateless_connection(CommentManager) as connection:
             connection.execute("pragma journal_mode=wal;")
             connection.execute("CREATE TABLE IF NOT EXISTS Comments (PostID TEXT, CommentID TEXT, OWNER INTEGER, BODY TEXT);")
-    def __search__(self, query: str):
+    def search(self, query: str):
         "ContentManager uses this to search comments, too. Returns list of relevant comments"
         SearchResults = []
         with self.make_connection() as connection:
@@ -173,6 +199,10 @@ class CommentManager:
             SearchResult["TITLE"] = BODY[startindex:endindex]
             SearchResults.append(SearchResult)
         return SearchResults
+    def get_comment_count(self, User: User | UserPublicFace) -> int:
+        connection = self.make_connection()
+        cursor = connection.execute("SELECT COUNT(*) FROM Comments WHERE OWNER=?;",(User.id,))
+        return cursor.fetchone()[0]
     def add_comment(self, Post: Post, Owner: User, Text: str) -> bool | str:
         if len(Text) < CommentManager.MinimumCommentLength:
             return "Comment is too short."
