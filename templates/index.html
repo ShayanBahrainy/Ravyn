@@ -10,7 +10,7 @@
     </head>
     <body class="Body">
     <div class="Menu">
-        {% if username %}
+        {% if user %}
         <img src="/static/icons/newpost.png" class="NewPost" id="NewPost" alt="">
         <img class="WelcomeMessage LoggedInLogo" alt="RavynLogo" src="/static/icons/favicon.ico">
         <div class="Notifications" id="Notifications">
@@ -19,12 +19,12 @@
         {% endif %}
         <p class="NotificationsButton LargeText">✉️</p>
         </div>
-        {% if admin %}
+        {% if user.admin %}
         <button class="AdminButton" onclick="location='/admin/console'">⚙️</button>
         {% endif %}
-        <img src="{{picture}}" class="ProfilePicture SelfProfile" alt="{{username}}" title="{{username}}" href="/profile/{{userid}}">
+        <img src="{{user.picture}}" class="ProfilePicture SelfProfile" alt="{{user.username}}" title="{{user.username}}" data-user-id="{{user.id}}">
         {%endif%}
-        {%if not username%}
+        {%if not user%}
         <p class="WelcomeMessage LargeText">Welcome!</p>
         <img class="NotLoggedIn" src="/static/icons/favicon.ico" alt="Ravyn Logo">
         <button onclick="location='/login'" class="LoginButton">Log in!</button>

@@ -11,7 +11,7 @@
     <body>
         <div id="PostID" data-id="{{post.id}}" style="display: none;"></div>
         <p class="Header LargeText">{{post.name}}</p>
-        <p class="Header ReallySmallText AuthorName">By {{post.author.capitalize()}}</p>
+        <p class="Header ReallySmallText AuthorName" id="AuthorName" data-user-id="{{post.authorid}}">By {{post.author.capitalize()}}</p>
         <select title="Extra Options" id="menu" class="controlsButton menuOptions Button">
         <option value="" class="MenuOption" disabled selected>...</option>
         <option class="MenuOption" value="report">Report</option>
@@ -36,7 +36,7 @@
         <div class="CommentHolder">
             {% for comment in Comments%}
             <div class="Comment" id="{{comment.id}}">
-            <img src="{{comment.owner.profileimage}}" class="CommentImage ProfilePicture" alt="{{comment.owner.name}}'s profile picture" title="{{comment.owner.name.capitalize()}}">
+            <img src="{{comment.owner.profileimage}}" class="CommentImage ProfilePicture" alt="{{comment.owner.name}}'s profile picture" title="{{comment.owner.name.capitalize()}}" data-user-id="{{comment.owner.id}}">
             <p class="CommentContent"> {{comment.content}}</p>
             <select class="CommentOptions" data-id="{{comment.id}}"><option selected disabled>...</option><option value="Report">Report</option></select>
             </div>

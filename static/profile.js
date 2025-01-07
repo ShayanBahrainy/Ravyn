@@ -1,9 +1,8 @@
 function setPage(page) {
-    console.log(page)
     document.getElementById("PageNumber").innerHTML = page + 1
-    let params = new URLSearchParams(window.location.search)
-    params.set("page",page)
-    window.location.search = params.toString()
+    let params = new URL(window.location)
+    params.searchParams.set("page",page)
+    window.location.replace(params.toString())
 }
 function NextPage() {
     let params = new URLSearchParams(window.location.search)
@@ -30,7 +29,7 @@ function PreviousPage() {
     }
 }
 function Back() {
-    location = '/'
+    history.back()
 }
 window.addEventListener("load", function () {
     this.document.getElementById("NextButton").addEventListener("click",NextPage)

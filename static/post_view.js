@@ -53,4 +53,14 @@ window.addEventListener("load", function (e) {
   if (params.get("showComment") != null) {
     this.document.getElementById(params.get("showComment")).scrollIntoView(true)
   }
+  let profiles = this.document.getElementsByClassName("CommentImage")
+  for (let profile of profiles) {
+    profile.addEventListener("click", function (){
+      location = "/profile/" + profile.dataset.userId
+    })
+  }
+  let authorlink = this.document.getElementById("AuthorName")
+  authorlink.addEventListener("click", function () {
+    location = "/profile/" + authorlink.dataset.userId
+  })
 })

@@ -49,7 +49,7 @@ def index():
                 notificationcount = "9+"
             if notificationcount == 0:
                 notificationcount = None
-            return render_template("index.html",username=user.username, picture=user.picture, feed=contentmanager.get_feed(user),admin=user.admin,notificationcount=notificationcount,userid=user.id)
+            return render_template("index.html", feed=contentmanager.get_feed(user),notificationcount=notificationcount,user=user)
     return render_template("index.html",username=False, feed=contentmanager.get_feed())
 @app.route("/notifications/")
 def notification_index():

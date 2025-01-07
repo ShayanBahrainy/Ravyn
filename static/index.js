@@ -115,6 +115,12 @@ function closeScreens() {
 }
 function addProfileLinks() {
     let profilepictures = this.document.getElementsByClassName("AuthorProfile")
+    let selfpicture = this.document.getElementsByClassName("SelfProfile")
+    if (selfpicture.length == 1) {
+        selfpicture[0].addEventListener("click", function () {
+            location = "/profile/" + selfpicture[0].dataset.userId
+        })
+    }
     for (let profilepicture of profilepictures) {
         profilepicture.addEventListener("click",function (ev){ 
             location='/profile/' + profilepicture.dataset.userId
