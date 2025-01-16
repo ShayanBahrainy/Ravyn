@@ -73,7 +73,6 @@ class RatingManager:
         results = []
         for UserId in self.__get_best_authors_id__(t):
             results.append(self.accounts.get_public_face(UserId))
-        print(results)
         return results
     def get_best_post(self, time: int) -> int:
         connection = self.make_connection()
