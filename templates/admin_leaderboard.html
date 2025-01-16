@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <link href="/static/admin_leaderboard.css" rel="stylesheet">
+        <script src="/static/base.js"></script>
+        <link rel="shortcut icon" href="/static/icons/favicon.ico">
+    </head>
+    <body>
+        <p class="LargeText Header"> <b>Congratulations!</b> </p>
+        <button onclick="history.back()" class="Button backButton LargeText">←</button>
+        <div class="UserContainer">
+            {% for User in Winners %} 
+            <div class="User" data-user-id="{{User.id}}">
+                <img src="{{User.profileimage}}" class="ProfilePicture">
+                <p class="Username"><b>({{loop.index}}th guy) {{ User.name.capitalize()}}</b></p>
+            </div>
+            {% endfor %}
+        </div>
+    </body>
+</html>

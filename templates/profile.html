@@ -6,11 +6,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="{{User.name.capitalize()}}'s profile on Ravyn. A great social platform Aurorii built to be friendly.">
         <link rel="shortcut icon" href="/static/icons/favicon.ico">
+        <script src="/static/base.js"></script>
         <title>{{User.name.capitalize()}} - Ravyn</title>
     </head>
     <body class="Body">
         <button id="backButton" class="backButton LargeText">←</button>
-        <img class="MainProfilePicture ProfilePicture" src="{{User.profileimage}}">
+        <img class="MainProfilePicture ProfilePicture" src="{{User.profileimage}}" data-user-id="{{User.id}}">
         <h1 class="ProfileName LargeText">{{User.name.capitalize()}}</h1>
         <div class="ProfileStats">
         <hr class="ProfileStatsDivider">
@@ -25,7 +26,7 @@
         <div class="PostsContainer">
                 {% for post in posts%}
                     <div class="Post" onclick="location='/post/{{post.id}}'">
-                        <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile ProfilePicture" alt="{{post.author}}'s profile" title="{{post.author.capitalize()}}">
+                        <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile ProfilePicture" alt="{{post.author}}'s profile" title="{{post.author.capitalize()}}" data-user-id="{{post.authorid}}">
                         <p class="PostTitle SmallText ">{{post.name.capitalize()}}</p>
                         {% if post.showmore %}
                         <p class="SmallText PostContent ShowMore">{{post.contentpreview}}  

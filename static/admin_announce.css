@@ -1,0 +1,70 @@
+@import url("/static/base.css");
+body {
+    background-color: var(--BackgroundColor);
+}
+.Header {
+    position: absolute;
+    top: 5%;
+    margin: 0px;
+    left: 30%;
+}
+.Controls {
+    position: absolute;
+    display: inline;
+    top: 65%;
+    left: 30%;
+    padding: 5px;
+}
+.ControlButton {
+    display: inline;
+    row-gap: 10%;
+    margin: 5px;
+    width: fit-content;
+    height: fit-content;
+}
+.ControlButton:hover {
+    background-color: var(--LightSideColor);
+}
+.UserTable {
+    position: absolute;
+    left: 25%;
+    top: 20%;
+}
+.UserId {
+    position: absolute;
+    top: 60%;
+    left: 25%;
+}
+.Modify {
+    display: flex;
+    position: absolute;
+    top: 40%;
+    flex-direction: column;
+    border-color: var(--GreyColor);
+    border-style: solid;
+}
+.SendButton {
+    position: absolute;
+    left: 50%;
+    top: 70%;
+    width: fit-content;
+    height: fit-content;
+}
+.PostTable {
+    position: absolute;
+    top: 20%;
+    left: 75%;
+}
+.PostId {
+    position: absolute;
+    top: 60%;
+    left: 75%;
+}
+.SendButton:hover {
+    background-color: var(--LightSideColor);
+}
+.Warning {
+    position: absolute;
+    top: 75%;
+    left: 25%;
+}

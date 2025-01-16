@@ -62,30 +62,59 @@ class NotificationManager:
             if cursor.fetchone() == (1,):
                 return 
             connection.execute("INSERT INTO Notifications (USERID, TYPE, CONTENTID) VALUES (?, ?, ?);", (UserID, "Comment", CommentID))
-        
+    def new_announcement(self, accounts: 'Accounts.Accounts', contentmanager: 'Content.ContentManager',  PostID: str, Users: list) -> str:
+        Post = contentmanager.get_post(PostID)
+        if not Post:
+            return 'No post found!'
+        if len(Users) == 0:
+            return 'No users submitted!'
+        if Users[0] == '*':
+            UserIds = accounts.getUserIDs()
+        else:
+            for UserId in Users:
+                if not accounts.get_public_face(UserId):
+                    Users.remove(UserId)
+            UserIds = Users
+        Data = []
+        for UserId in UserIds:
+            Data.append((UserId, "Post", Post.id))
+        with self.make_connection() as connection:
+            connection.executemany("INSERT INTO Notifications (USERID, TYPE, CONTENTID) VALUES (?,?,?);",Data)
+        return 'Success!'
     def get_notification_count(self, User: 'Accounts.User') -> int:
         with self.make_connection() as connection:
             cursor = connection.execute("SELECT COUNT(*) FROM Notifications WHERE USERID=?;",(User.id,))
             return cursor.fetchone()[0]
         
-    def get_feed(self, User: 'Accounts.User', CommentManager: 'Content.CommentManager') -> str:
+    def get_feed(self, User: 'Accounts.User', CommentManager: 'Content.CommentManager', ContentManager: 'Content.ContentManager') -> str:
         Feed = []
         with self.make_connection() as connection:
             cursor = connection.execute("SELECT * FROM Notifications WHERE USERID=? LIMIT ?;",(User.id,NotificationManager.MaxFeedLength))
             results = cursor.fetchall()
             for notification in results:
                 USERID, TYPE, CONTENTID = notification
-                if TYPE != "Comment":
-                    continue
-                Comment = CommentManager.get_comment(CONTENTID)
-                Result = {}
-                Result["HREF"] = "/post/" + Comment.postid + "/?showComment=" + Comment.id
-                Result["ID"] = Comment.id
-                if len(Comment.content) < NotificationManager.MaxTitleLength:
-                    Result["TITLE"] = Comment.content
-                else: 
-                    Result["TITLE"] = Comment.content[:NotificationManager.MaxTitleLength + 1] + "..."
-                Feed.append(Result)
+                if TYPE == "Post":
+                    Post = ContentManager.get_post(CONTENTID)
+                    Result = {}
+                    Result["HREF"] = "/post/" + Post.id
+                    Result["ID"] = Post.id
+                    Result["Announcement"] = False
+                    if len(Post.content) < NotificationManager.MaxTitleLength:
+                        Result["TITLE"] = Post.content
+                    else: 
+                        Result["TITLE"] = Post.content[:NotificationManager.MaxTitleLength + 1] + "..."
+                    Feed.append(Result)
+                if TYPE == "Comment":
+                    Comment = CommentManager.get_comment(CONTENTID)
+                    Result = {}
+                    Result["HREF"] = "/post/" + Comment.postid + "/?showComment=" + Comment.id
+                    Result["ID"] = Comment.id
+                    Result["Announcement"] = False
+                    if len(Comment.content) < NotificationManager.MaxTitleLength:
+                        Result["TITLE"] = Comment.content
+                    else: 
+                        Result["TITLE"] = Comment.content[:NotificationManager.MaxTitleLength + 1] + "..."
+                    Feed.append(Result)
         Data = {}
         Data["Notifications"] = Feed
         return json.dumps(Data)

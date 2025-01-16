@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <link href="/static/admin_announce.css" rel="stylesheet">
+        <script src="/static/admin_announce.js"></script>
+        <script src="/static/base.js"></script>
+        <link rel="shortcut icon" href="/static/icons/favicon.ico">
+    </head>
+    <body>
+        <button onclick="history.back()" class="Button backButton LargeText">←</button>
+        <p class="LargeText Header">Send a post as an announcement!</p>
+        <input class="PostId" id="PostId" placeholder="PostID">
+        <input class="UserId" id="UserId" placeholder="UserID">
+        <div class="UserTable" id="UserTable">
+            <p>User <br>--------------</p>
+
+        </div>
+        <div class="PostTable" id="PostTable">
+            <p>Post <br>--------------</p>
+        </div>
+        <div class="Modify">
+            <button class="Button ControlButton" id="AddUser">Add User to Announcement</button>
+            <button class="Button ControlButton" id="SendAll">Send to all Users</button>
+            <button class="Button ControlButton" id="SelectPost">Select Post</button>
+        </div>
+        <button class="Button SendButton" id="SendAnnouncement">Send Announcement!</button>
+        <p class="Warning LargeText">If you are <b>UNSURE IN ANYWAY</b>, please do not use this tool. <b>ASK SHAYAN!</b></p>
+    </body>
+</html>

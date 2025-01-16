@@ -10,7 +10,7 @@ class DatabaseHandler:
     def register_database(self, db: str, Class: type):
         if self.model.__contains__(Class):
             return
-        self.model[Class] = None
+        self.model[db] = None
         self.db_locations[Class] = db
     def get_stateless_connection(self, Class: type):
         return sqlite3.connect(self.db_locations[Class])
@@ -18,9 +18,10 @@ class DatabaseHandler:
         request = request._get_current_object()
         if not self.contexts.__contains__(request):
             self.contexts[request] = self.model.copy()
-        if self.contexts[request][Class] == None:
-            self.contexts[request][Class] = sqlite3.connect(self.db_locations[Class])
-        return self.contexts[request][Class]
+        db_location = self.db_locations[Class]
+        if self.contexts[request][db_location] == None:
+            self.contexts[request][db_location] = sqlite3.connect(self.db_locations[Class])
+        return self.contexts[request][db_location]
     def request_finished(self, request):
         if self.contexts.__contains__(request):
             for connection in self.contexts[request].values():

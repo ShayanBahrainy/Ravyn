@@ -2,9 +2,12 @@
     <head>
         <link href="/static/admin_console.css" rel="stylesheet">
         <script src="/static/admin_console.js"></script>
+        <script src="/static/base.js"></script>
         <link rel="shortcut icon" href="/static/icons/favicon.ico">
     </head>
     <body>
+        <button class="AnnounceButton Button" id="AnnounceButton">Announce!</button>
+        <button class="LeaderboardButton Button" id="LeaderboardButton">Leaderboard!</button>
         <h1 class="Header LargeText">Moderate!</h1>
         {% if reports%}
         <table class="ReportsContainer">

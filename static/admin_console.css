@@ -49,3 +49,21 @@ body {
     height: 4%;
     background: none;
 }
+.AnnounceButton {
+    position: absolute;
+    left: 80%;
+    top: 10%;
+}
+.AnnounceButton:hover {
+    color: var(--GreyColor);
+    background-color: var(--LightSideColor);
+}
+.LeaderboardButton {
+    position: absolute;
+    left: 80%;
+    top: 15%;
+}
+.LeaderboardButton:hover {
+    color: var(--GreyColor);
+    background-color: var(--LightSideColor);
+}

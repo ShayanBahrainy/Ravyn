@@ -7,10 +7,13 @@
         <meta name="description" content="'{{post.name}}' - a post by {{post.author.capitalize()}} on Ravyn.">
         <link rel="stylesheet" href="/static/post_view.css">
         <script src="/static/post_view.js"></script>
+        <script src="/static/base.js"></script>
     </head>
     <body>
-        <div id="PostID" data-id="{{post.id}}" style="display: none;"></div>
+        <div id="PostID" data-post-id="{{post.id}}">
         <p class="Header LargeText">{{post.name}}</p>
+        <!-- <button class="DownShift LargeText Button" id="DownShift">↘</button>
+        <button class="UpLift LargeText Button" id="UpLift">↗</button> -->
         <p class="Header ReallySmallText AuthorName" id="AuthorName" data-user-id="{{post.authorid}}">By {{post.author.capitalize()}}</p>
         <select title="Extra Options" id="menu" class="controlsButton menuOptions Button">
         <option value="" class="MenuOption" disabled selected>...</option>
@@ -29,15 +32,16 @@
                 {% endif %}
             </p>
             {% endif %}
-        <textarea type="text" class="NewComment" placeholder="Type comment here" id="NewComment"></textarea>
+        <textarea type="text" class="NewComment" placeholder="Type comment here" id="NewComment" minlength="10"></textarea>
         <button class="SubmitComment" id="SubmitComment" >Comment</button>
+        </div>
         </div>
         {% if Comments %}
         <div class="CommentHolder">
             {% for comment in Comments%}
             <div class="Comment" id="{{comment.id}}">
             <img src="{{comment.owner.profileimage}}" class="CommentImage ProfilePicture" alt="{{comment.owner.name}}'s profile picture" title="{{comment.owner.name.capitalize()}}" data-user-id="{{comment.owner.id}}">
-            <p class="CommentContent"> {{comment.content}}</p>
+            <p class="CommentContent" data-user-id="{{comment.owner.id}}"> {{comment.content}}</p>
             <select class="CommentOptions" data-id="{{comment.id}}"><option selected disabled>...</option><option value="Report">Report</option></select>
             </div>
             {% endfor %}

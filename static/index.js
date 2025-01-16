@@ -128,6 +128,39 @@ function addProfileLinks() {
         })
     }
 }
+function DownShift(ID) {
+    fetch("/post/" + ID + "/downshift/", {method: "POST", credentials:"same-origin"})
+}
+function handleResult(response) {
+    if (response.ok) {
+        return
+    }
+    if (response.status == 404) {
+        alert('404; Not found!')
+        return
+    }
+    if (409 > response.status && response.status > 400) {
+      alert('Try logging in or making an account :)')
+      return
+    }
+    alert("I'm so sorry an unkown error occurred")
+  }
+function addUpLiftandDownShiftButtons() {
+    let UpLift = document.getElementsByClassName("UpLift")
+    let DownShift = document.getElementsByClassName("DownShift")
+    for (let button of UpLift) {
+        button.addEventListener("click", function (ev) {
+            fetch("/post/" + button.dataset.postId + "/uplift/", {method: "POST", credentials:"same-origin"}).then(handleResult)
+            ev.stopPropagation()
+        })
+    }
+    for (let button of DownShift) {
+        button.addEventListener("click", function (ev) {
+            fetch("/post/" + button.dataset.postId + "/downshift/", {method: "POST", credentials:"same-origin"}).then(handleResult)
+            ev.stopPropagation()
+        }) 
+    }
+}
 function addPostLinks() {
     let posts = this.document.getElementById("Feed").children
     for (let post of posts) {
@@ -154,5 +187,6 @@ window.addEventListener("load", function () {
     }
     this.document.getElementById("OpenSearch").addEventListener("click", OpenSearch)
     addProfileLinks()
+    addUpLiftandDownShiftButtons()
     addPostLinks()
 })

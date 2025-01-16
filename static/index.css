@@ -261,7 +261,7 @@
     position: fixed;
     left: 0%;
     top: 0%;
-    opacity: 1;
+    opacity: 0.95;
     background-color: var(--BackgroundColor);
     z-index: 10;
     overflow: scroll;
@@ -291,4 +291,25 @@
 .NotificationContainer {
     display: flex;
     flex-direction: row;
+}
+.UpLift:hover {
+    background-color: var(--GreyColor);
+    color: var(--SideColor);
+}
+.VibeScore {
+    display: inline;
+    margin: 0px;
+}
+.UpLift {
+    width: fit-content;
+}
+.DownShift {
+    width: fit-content;
+}
+.VibeScore {
+    color: var(--GreyColor);
+}
+.DownShift:hover {
+    background-color: var(--GreyColor);
+    color: var(--SideColor);
 }

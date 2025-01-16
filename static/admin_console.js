@@ -26,5 +26,11 @@ function removeFromTable(id) {
 }
 
 window.addEventListener("load", function () {
-    this.document.getElementById("Free").addEventListener("click", freePost)
+    //this.document.getElementById("Free").addEventListener("click", freePost)
+    this.document.getElementById("AnnounceButton").addEventListener("click", function () {
+        location = "/admin/announcement/"
+    })
+    this.document.getElementById("LeaderboardButton").addEventListener("click", function () {
+        location = "/admin/leaderboard/"
+    })
 })

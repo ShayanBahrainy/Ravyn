@@ -5,7 +5,7 @@ import sqlite3
 import requests
 
 from Accounts import Accounts
-from Content import ContentManager, Post, ReportManager, CommentManager, Comment
+from Content import ContentManager, Post, ReportManager, CommentManager, Comment, RatingManager
 
 from oauthlib.oauth2 import WebApplicationClient
 
@@ -29,8 +29,9 @@ def get_google_provider_cfg():
 databasehandler = DatabaseHandler()
 
 accounts = Accounts(databasehandler, "Accounts.db", "admin.txt", BETA_ACCOUNTS)
+ratingmanager = RatingManager(databasehandler, "Posts.db", accounts)
 viewmanager = ViewedManager(databasehandler, "Viewed.db")
-contentmanager = ContentManager(databasehandler, "Posts.db", accounts, viewmanager)
+contentmanager = ContentManager(databasehandler, "Posts.db", accounts, viewmanager, ratingmanager)
 notificationmanager = NotificationManager(databasehandler, "Notifications.db")
 commentmanager = CommentManager(databasehandler, "Posts.db", contentmanager, notificationmanager)
 reportmanager = ReportManager(databasehandler, "Reports.db", contentmanager, commentmanager)
@@ -38,7 +39,7 @@ client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-
+app.config["TEMPLATE_AUTO_RELOAD"] = True
 @app.route("/")
 def index():
     if request.cookies.__contains__("AUTH"):
@@ -51,12 +52,36 @@ def index():
                 notificationcount = None
             return render_template("index.html", feed=contentmanager.get_feed(user),notificationcount=notificationcount,user=user)
     return render_template("index.html",username=False, feed=contentmanager.get_feed())
+@app.route("/post/<PostID>/uplift/",methods=["POST"])
+def uplift(PostID):
+    if request.cookies.__contains__("AUTH"):
+        user = accounts.is_logged_in(request.cookies["AUTH"])
+        if not user:
+            return abort(403)
+        post = contentmanager.get_post(PostID)
+        if not post:
+            return abort(404)
+        ratingmanager.make_rating(user, post, 1)
+        return 'Success!'
+    return abort(401)
+@app.route("/post/<PostID>/downshift/",methods=["POST"])
+def downshift(PostID):
+    if request.cookies.__contains__("AUTH"):
+        user = accounts.is_logged_in(request.cookies["AUTH"])
+        if not user:
+            return abort(403)
+        post = contentmanager.get_post(PostID)
+        if not post:
+            return abort(404)
+        ratingmanager.make_rating(user, post, -1)
+        return 'Success!'
+    return abort(401)
 @app.route("/notifications/")
 def notification_index():
     if request.cookies.__contains__("AUTH"):
         user = accounts.is_logged_in(request.cookies["AUTH"])
         if user:
-            data = notificationmanager.get_feed(user, commentmanager)
+            data = notificationmanager.get_feed(user, commentmanager, contentmanager)
             response = Response(data, content_type="application/json")
             return response
     return abort(403)
@@ -96,13 +121,14 @@ def newPostPage():
         if not request.form.__contains__("Title"):
             return render_template("new_post.html",failReason="No title!")
         r = contentmanager.create_post(request.form["Title"], request.form["Body"], user.id)
-        if type(r) != str:
-            return redirect("/")
-        return render_template("new_post.html", failReason=r)
+        if not r[0]:
+            return render_template("new_post.html", failReason=r[1])
+        else:
+            return redirect("/post/" + r[1])
 @app.route("/report/<ContentID>", methods=["POST"])
 def report(ContentID):
     if not request.cookies.__contains__("AUTH"):
-        return redirect("/")
+        return abort(401)
     user = accounts.is_logged_in(request.cookies["AUTH"])
     if not user:
         return abort(403)
@@ -111,7 +137,6 @@ def report(ContentID):
         content = contentmanager.get_post(ContentID)
     if typ == Comment:
         content = commentmanager.get_comment(ContentID)
-    reportmanager.make_report(content,user)
     if not content:
         return abort(404)
     return str(reportmanager.make_report(content, user))
@@ -152,7 +177,7 @@ def comment_index(PostID):
     if result:
         return 'Success!'
     else:
-        return abort(422)
+        return Response("Comment too short?",status=422)
 @app.route("/admin/console/")
 def admin_console():
     if not request.cookies.__contains__("AUTH"):
@@ -162,6 +187,54 @@ def admin_console():
         return redirect("/")
     feed = reportmanager.get_feed()
     return render_template("admin_console.html", reports=feed,type=type,str=str)
+@app.route("/admin/announcement/",methods=["GET","POST"])
+def admin_announcement():
+    if not request.cookies.__contains__("AUTH"):
+        return redirect("/")
+    user = accounts.is_logged_in(request.cookies["AUTH"])
+    if not user or not user.admin:
+        return redirect("/")
+    if request.method == "GET":
+        return render_template("admin_announce.html")
+    data = request.get_json()
+    result = notificationmanager.new_announcement(accounts, contentmanager, data["PostID"],data["Users"])
+    return result
+@app.route("/admin/user/<UserID>/",methods=["POST"])
+def verify_user(UserID):
+    if not request.cookies.__contains__("AUTH"):
+        return abort(401)
+    user = accounts.is_logged_in(request.cookies["AUTH"])
+    if not user or not user.admin:
+        return abort(401)
+    check_user = accounts.get_public_face(UserID)
+    if not check_user:
+        return abort(404)
+    data = {}
+    data["Username"] = check_user.name.capitalize()
+    return json.dumps(data)
+@app.route("/admin/post/<PostID>/",methods=["POST"])
+def verify_post(PostID):
+    if not request.cookies.__contains__("AUTH"):
+        return abort(401)
+    user = accounts.is_logged_in(request.cookies["AUTH"])
+    if not user or not user.admin:
+        return abort(401)
+    check_post = contentmanager.get_post(PostID)
+    if not check_post:
+        return abort(404)
+    data = {}
+    data["PostName"] = check_post.name
+    data["Author"] = check_post.author
+    data["PostID"] = check_post.id
+    return json.dumps(data)
+@app.route("/admin/leaderboard/")
+def leaderboard():
+    if not request.cookies.__contains__("AUTH"):
+        return abort(401)
+    user = accounts.is_logged_in(request.cookies["AUTH"])
+    if not user or not user.admin:
+        return abort(401)
+    return render_template("admin_leaderboard.html",Winners=ratingmanager.get_best_authors())
 @app.route("/search/<Query>")
 def search_index(Query):
     return contentmanager.search(Query, commentmanager)

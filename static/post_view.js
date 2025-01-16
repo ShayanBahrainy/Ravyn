@@ -1,5 +1,5 @@
 function sendPostReport() {
-  let ID = document.getElementById("PostID").dataset.id
+  let ID = document.getElementById("PostID").dataset.postId
   fetch("/report/" + ID, {method: "POST", credentials:"same-origin"})
 }
 function submitCommentReport(id) {
@@ -8,7 +8,11 @@ function submitCommentReport(id) {
 
 function submitComment() {
   const comment = document.getElementById("NewComment").value
-  const PostID = document.getElementById("PostID").dataset.id
+  if (comment.length < 10) {
+    alert('Comment too short!')
+    return
+  }
+  const PostID = document.getElementById("PostID").dataset.postId
   let data = {Comment:comment}
   fetch("/comment/" + PostID, {method:"POST", credentials:"same-origin", body:JSON.stringify(data), headers:{
     'Accept': 'application/json',

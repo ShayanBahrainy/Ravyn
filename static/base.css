@@ -6,7 +6,7 @@
     --LightTextColor: #121212;
     --LightSideColor: #fcf2fb;
     --LightBackgroundColor: #FFFF;
-    --GreyColor: #946cbb;
+    --GreyColor: #541594;
 }
 ::placeholder {
     color: var(--MainColor);
@@ -35,4 +35,26 @@
     width: 8%;
     height: 4%;
     background: none;
+}
+
+#ctxmenu {
+    position: absolute;
+    background: var(--BackgroundColor);
+    color: var(--TextColor);
+    cursor: pointer;
+    border: 1px var(--GreyColor);
+    z-index: 10;
+}
+  
+#ctxmenu > p {
+    padding: 0 1rem;
+    margin: 0
+}
+  
+#ctxmenu > p:hover {
+    background: var(--GreyColor);
+    color: var(--SideColor);
+}
+.backButton:hover {
+    color: var(--GreyColor);
 }

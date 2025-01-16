@@ -12,19 +12,74 @@ from Notifications import NotificationManager, ViewedManager
 
 class Post:
     ContentPreviewMaxLength = 150
-    def __init__(self, id: str, name: str, authorid: int, author: str, authorprofile: str, content: str, comments: list['Comment']=[]):
+    def __init__(self, id: str, name: str, authorid: int, author: str, authorprofile: str, content: str, comments: list['Comment']=[], score:int=0):
         self.id = id
         self.name = name
         self.author = author
         self.authorprofile = authorprofile
         self.authorid = authorid
         self.content = content
+        self.score = score
         self.showmore = len(content) > Post.ContentPreviewMaxLength
         if len(content) > Post.ContentPreviewMaxLength:
             self.contentpreview = self.content[:Post.ContentPreviewMaxLength + 1]
         else:
             self.contentpreview = content
         self.comments = comments
+    def set_score(self, score: int=0):
+        self.score = score
+class RatingManager:
+    BestAuthorStatement = """
+    SELECT Owner, SUM(Rating) AS TotalRating
+    FROM Ratings
+    WHERE TimeStamp >= ?
+    GROUP BY Owner
+    ORDER BY TotalRating DESC
+    LIMIT 5;
+    """
+    BestPostStatement = """
+    SELECT ContentID, SUM(Rating) AS TotalRating
+    FROM Ratings
+    WHERE TimeStamp >= ?
+    GROUP BY Owner
+    ORDER BY TotalRating DESC
+    LIMIT 5;
+    """
+    TimePeriod = 7 * 24 * 60 * 60
+    def __init__(self, dbhandler: DatabaseHandler, db: str, accounts: Accounts):
+        self.dbhandler = dbhandler
+        self.dbhandler.register_database(db, RatingManager)
+        self.accounts = accounts
+        with self.dbhandler.get_stateless_connection(RatingManager) as connection:
+            connection.execute("pragma journal_mode=wal;")
+            connection.execute("CREATE TABLE IF NOT EXISTS Ratings (Rater INTEGER, Owner INTEGER, ContentID TEXT, Rating INTEGER, TimeStamp INTEGER, UNIQUE(Rater,ContentID));")
+    def make_connection(self):
+        return self.dbhandler.get_connection(request, RatingManager)
+    def make_rating(self, Rater: User, Post: Post, Rating: int):
+        with self.make_connection() as connection:
+            cursor = connection.execute("DELETE FROM Ratings WHERE Rater=? AND ContentID=?;",(Rater.id, Post.id))
+            cursor.execute("INSERT INTO Ratings (Rater, Owner, ContentID, Rating, TimeStamp) VALUES (?,?,?,?,?);",(Rater.id, Post.authorid, Post.id, Rating, int(time.time())))
+    def get_rating(self, Post: Post) -> int:
+        connection = self.make_connection()
+        cursor = connection.execute("SELECT SUM(Rating) FROM Ratings WHERE CONTENTID=?;",(Post.id,))
+        r = cursor.fetchone()[0]
+        return r if r else 0
+    def __get_best_authors_id__(self, time: int) -> list[int]:
+        connection = self.make_connection()
+        cursor = connection.execute(RatingManager.BestAuthorStatement, (time,))
+        return [AuthorId[0] for AuthorId in cursor.fetchall()]
+    def get_best_authors(self) -> list[UserPublicFace]:
+        t = int(time.time()) - RatingManager.TimePeriod
+        results = []
+        for UserId in self.__get_best_authors_id__(t):
+            results.append(self.accounts.get_public_face(UserId))
+        print(results)
+        return results
+    def get_best_post(self, time: int) -> int:
+        connection = self.make_connection()
+        cursor = connection.execute(RatingManager.BestPostStatement, (time,))
+        return cursor.fetchone()[1]
+
 class ContentManager:
     MIN_TITLE_LENGTH = 10
     MAX_TITLE_LENGTH = 100
@@ -35,11 +90,12 @@ class ContentManager:
     FeedQuery = """
     SELECT * FROM Posts WHERE ID NOT IN ({bindings}) ORDER BY TIME DESC LIMIT ? OFFSET ?;
     """
-    def __init__(self, dbhandler: DatabaseHandler, db: str, accounts: Accounts, viewmanager: ViewedManager):
+    def __init__(self, dbhandler: DatabaseHandler, db: str, accounts: Accounts, viewmanager: ViewedManager, ratingmanager: RatingManager):
         self.dbhandler = dbhandler
         self.dbhandler.register_database(db, ContentManager)
         self.accounts = accounts
         self.viewmanager = viewmanager
+        self.ratingmanager = ratingmanager
         with dbhandler.get_stateless_connection(ContentManager) as connection:
             connection.execute("pragma journal_mode=wal;")
             connection.execute("CREATE TABLE IF NOT EXISTS Posts (ID TEXT, TIME INTEGER, OWNER INTEGER, BODY TEXT, TITLE TEXT);")
@@ -64,6 +120,7 @@ class ContentManager:
         for postdata in cursor.fetchall():
             user = self.accounts.get_public_face(postdata[2])
             post = Post(postdata[0], postdata[4], user.id, user.name, user.profileimage, postdata[3])
+            post.set_score(self.ratingmanager.get_rating(post))
             results.append(post)
         return results
     def search(self, query: str, commentmanager: 'CommentManager'):
@@ -126,6 +183,7 @@ class ContentManager:
             for postdata in posts:
                 user = self.accounts.get_public_face(postdata[2])
                 post = Post(postdata[0], postdata[4], user.id, user.name, user.profileimage, postdata[3])
+                post.set_score(self.ratingmanager.get_rating(post))
                 results.append(post)
         return results
     def get_post(self, id: str):
@@ -135,22 +193,23 @@ class ContentManager:
             cursor = connection.execute("SELECT ID, TITLE, OWNER, BODY FROM Posts WHERE ID=?;",(id,))
             r = cursor.fetchone()
         user = self.accounts.get_public_face(r[2])
-        return Post(r[0], r[1], user.id, user.name, user.profileimage, r[3])
-    
+        post = Post(r[0], r[1], user.id, user.name, user.profileimage, r[3])
+        post.set_score(self.ratingmanager.get_rating(post))
+        return post
     def create_post(self, title: str, body: str, user_id: int):
         if len(body) < ContentManager.MIN_BODY_LENGTH:
-            return "Body too short"
+            return [False, "Body too short"]
         if len(title) < ContentManager.MIN_TITLE_LENGTH:
-            return "Title too short"
+            return [False,"Title too short"]
         if len(title) > ContentManager.MAX_TITLE_LENGTH:
-            return "Title too long"
+            return [False, "Title too long"]
         with self.make_connection() as connection:
             r = connection.execute("SELECT EXISTS(SELECT 1 FROM Posts WHERE BODY = ?);", (body,))
             if r.fetchone() == (1,):
                 return "Post already exists"
             id = str(uuid.uuid4())
             r = connection.execute("INSERT INTO Posts (ID, TIME, OWNER, BODY, TITLE) VALUES (?,?,?,?,?);", (id, int(time.time()), user_id, body, title,))
-        return True
+        return [True,id]
     def delete_post(self, id: str):
         with self.make_connection() as connection:
             connection.execute("DELETE FROM Posts WHERE ID=?;",(id,))
@@ -261,6 +320,9 @@ class CommentManager:
         self.notificationmanager.delete_comment(Comment)
         with self.make_connection() as connection:
             connection.execute("DELETE FROM Comments WHERE CommentID=?;",(Comment.id,))
+    def delete_post_comments(self, PostID: str):
+        with self.make_connection() as connection:
+            connection.execute("DELETE FROM Comments WHERE PostID=?;",(PostID,))
     def make_connection(self):
         return self.dbhandler.get_connection(request, CommentManager)
 class ReportManager:
@@ -283,6 +345,7 @@ class ReportManager:
         Content = self.get_content(ContentID, typ)
         if type(Content) == Post:
             self.contentmanager.delete_post(Content.id)
+            self.commentmanager.delete_post_comments(Content.id)
         if type(Content) == Comment:
             self.commentmanager.delete_comment(Content)
         with self.make_connection() as connection:

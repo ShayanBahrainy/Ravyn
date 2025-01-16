@@ -1,0 +1,23 @@
+@import url("/static/base.css");
+body {
+    background-color: var(--BackgroundColor);
+}
+.Header {
+    position: absolute;
+    top: 5%;
+    left: 35%;
+}
+.UserContainer {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    left: 30%;
+    top: 40%;
+}
+.User {
+    display: inline;
+    row-gap: 10%;
+    margin: 5px;
+    width: fit-content;
+    height: fit-content;
+}

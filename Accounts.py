@@ -43,6 +43,11 @@ class Accounts:
             if result:
                 return UserPublicFace(result[0],result[1],result[2])
         return False
+    def getUserIDs(self) -> list[int]:
+        connection = self.make_connection()
+        cursor = connection.execute("SELECT ID FROM Accounts;")
+        UserIDs = [UserID[0] for UserID in cursor.fetchall()]
+        return UserIDs
     def make_connection(self):
         return self.dbhandler.get_connection(request, Accounts)
     def create_account(self, ID, USERNAME, EMAIL, PICTURE): 

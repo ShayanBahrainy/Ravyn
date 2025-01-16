@@ -3,6 +3,7 @@
     <head>
         <link rel="stylesheet" href="/static/index.css">
         <script src="/static/index.js"></script>
+        <script src="/static/base.js"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="Ravyn is the new friendly social media platform. We strive to be nontoxic, and try to do this via AI.">
         <link rel="shortcut icon" href="/static/icons/favicon.ico">
@@ -48,10 +49,13 @@
                 <img alt="{{post.author}}" src="{{post.authorprofile}}" class="AuthorProfile ProfilePicture" alt="{{post.author}}'s profile" title="{{post.author.capitalize()}}" data-user-id="{{post.authorid}}">
                 <p class="PostTitle SmallText ">{{post.name.capitalize()}}</p>
                 {% if post.showmore %}
-                <p class="SmallText PostContent ShowMore">{{post.contentpreview}}  
+                <p class="SmallText PostContent ShowMore">{{post.contentpreview}}  </p>
                 {% else %}
-                <p class="SmallText PostContent">{{post.contentpreview}}  
+                <p class="SmallText PostContent">{{post.contentpreview}}  </p>
                 {% endif %}
+                <button class="UpLift Button" data-post-id="{{post.id}}">Uplift ↗</button>
+                <p class="VibeScore">Vibe {{post.score}}</p>
+                <button class="DownShift Button" data-post-id="{{post.id}}">Downshift ↘</button>
             </div>
         {%endfor%}
         </div>
