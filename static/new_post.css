@@ -9,11 +9,8 @@
     color: var(--MainColor);
 }
 .PublishButton {
-    position: relative;
-    top: 20%;
-    left: 25%;
     margin-left: 10%;
-    margin-top: 5%;
+    margin-top: 10%;
     margin-bottom: 0px;
     border: none;
     background-color: var(--SideColor);
@@ -25,7 +22,7 @@
 .Header {
     position: fixed;
     top: 0%;
-    left: 40%;
+    left: 42.5%;
 }
 .Form {
     position: fixed;
@@ -55,4 +52,15 @@
     position: relative;
     left: 30%;
     margin: 5%;
+}
+.AttachImage {
+    display: none;
+}
+.PostOptions {
+    border: none;
+    background: none;
+    color: var(--MainColor);
+    font-size: 1.5em;
+    position: absolute;
+    left: 80%;
 }

@@ -1,3 +1,4 @@
+from pathlib import Path
 import uuid
 import hashlib
 import random
@@ -5,18 +6,22 @@ import math
 import json
 import time
 from flask import request
+from werkzeug.datastructures import FileStorage
 
 from Accounts import Accounts, User, UserPublicFace
 from DatabaseHandler import DatabaseHandler
+from FileUtils import FileSafety, ImageHandler
 from Notifications import NotificationManager, ViewedManager
+from Utils import ActionResult
 
 class Post:
     ContentPreviewMaxLength = 150
-    def __init__(self, id: str, name: str, authorid: int, author: str, authorprofile: str, content: str, comments: list['Comment']=[], score:int=0):
+    def __init__(self, id: str, name: str, authorid: int, author: str, authorprofile: str, content: str, comments: list['Comment']=[], score:int=0, hasimage:bool=None):
         self.id = id
         self.name = name
         self.author = author
         self.authorprofile = authorprofile
+        self.hasimage = hasimage
         self.authorid = authorid
         self.content = content
         self.score = score
@@ -55,6 +60,9 @@ class RatingManager:
             connection.execute("CREATE TABLE IF NOT EXISTS Ratings (Rater INTEGER, Owner INTEGER, ContentID TEXT, Rating INTEGER, TimeStamp INTEGER, UNIQUE(Rater,ContentID));")
     def make_connection(self):
         return self.dbhandler.get_connection(request, RatingManager)
+    def clear_post(self, PostID: str):
+        with self.make_connection() as connection:
+            connection.execute("DELETE FROM Ratings WHERE ContentID=?;",(PostID,))
     def make_rating(self, Rater: User, Post: Post, Rating: int):
         with self.make_connection() as connection:
             cursor = connection.execute("DELETE FROM Ratings WHERE Rater=? AND ContentID=?;",(Rater.id, Post.id))
@@ -95,6 +103,7 @@ class ContentManager:
         self.accounts = accounts
         self.viewmanager = viewmanager
         self.ratingmanager = ratingmanager
+        self.filesafety = FileSafety()
         with dbhandler.get_stateless_connection(ContentManager) as connection:
             connection.execute("pragma journal_mode=wal;")
             connection.execute("CREATE TABLE IF NOT EXISTS Posts (ID TEXT, TIME INTEGER, OWNER INTEGER, BODY TEXT, TITLE TEXT);")
@@ -189,29 +198,41 @@ class ContentManager:
         if not self.validate_post_for_showing(id):
             return
         with self.make_connection() as connection:
-            cursor = connection.execute("SELECT ID, TITLE, OWNER, BODY FROM Posts WHERE ID=?;",(id,))
+            cursor = connection.execute("SELECT ID, TITLE, OWNER, BODY, HASIMAGE FROM Posts WHERE ID=?;",(id,))
             r = cursor.fetchone()
         user = self.accounts.get_public_face(r[2])
-        post = Post(r[0], r[1], user.id, user.name, user.profileimage, r[3])
+        post = Post(r[0], r[1], user.id, user.name, user.profileimage, r[3], hasimage=(r[4] == 1))
         post.set_score(self.ratingmanager.get_rating(post))
         return post
-    def create_post(self, title: str, body: str, user_id: int):
+    def create_post(self, title: str, body: str, user_id: int, image: FileStorage) -> ActionResult:
         if len(body) < ContentManager.MIN_BODY_LENGTH:
-            return [False, "Body too short"]
+            return ActionResult(False, "Body too short")
         if len(title) < ContentManager.MIN_TITLE_LENGTH:
-            return [False,"Title too short"]
+            return ActionResult(False,"Title too short")
         if len(title) > ContentManager.MAX_TITLE_LENGTH:
-            return [False, "Title too long"]
+            return ActionResult(False, "Title too long")
+        if image:
+            result = self.filesafety.is_safe(image)
+            if not result.success:
+                return result
+            result = ImageHandler.verify_image(image)
+            if not result.success:
+                return result
         with self.make_connection() as connection:
             r = connection.execute("SELECT EXISTS(SELECT 1 FROM Posts WHERE BODY = ?);", (body,))
             if r.fetchone() == (1,):
-                return "Post already exists"
+                return ActionResult(False,"Post already exists")
             id = str(uuid.uuid4())
-            r = connection.execute("INSERT INTO Posts (ID, TIME, OWNER, BODY, TITLE) VALUES (?,?,?,?,?);", (id, int(time.time()), user_id, body, title,))
-        return [True,id]
+            hasimage = 1 if image else 0
+            r = connection.execute("INSERT INTO Posts (ID, TIME, OWNER, BODY, TITLE, HasImage) VALUES (?,?,?,?,?,?);", (id, int(time.time()), user_id, body, title, hasimage))
+        if image:
+            ImageHandler.save_as_webp("./Data/Images/" + id + ".webp", image)
+        return ActionResult(True, id)
     def delete_post(self, id: str):
         with self.make_connection() as connection:
             connection.execute("DELETE FROM Posts WHERE ID=?;",(id,))
+        file = Path("./Data/Images/" + id + ".webp")
+        file.unlink(True)
 class Comment:
     def __init__(self, id: str, content: str, owner: UserPublicFace, postid: str):
         self.id = id
@@ -326,11 +347,12 @@ class CommentManager:
         return self.dbhandler.get_connection(request, CommentManager)
 class ReportManager:
     MAX_FEED_LENGTH = 25
-    def __init__(self, dbhandler: DatabaseHandler, db: str, contentmanager: ContentManager, commentmanager: CommentManager):
+    def __init__(self, dbhandler: DatabaseHandler, db: str, contentmanager: ContentManager, commentmanager: CommentManager, ratingmanager: RatingManager):
         self.dbhandler = dbhandler
         dbhandler.register_database(db, ReportManager)
         self.contentmanager = contentmanager
         self.commentmanager = commentmanager
+        self.ratingmanager = ratingmanager
         #In DB, type 0 means post, type 1 means comment
         with dbhandler.get_stateless_connection(ReportManager) as connection:
             connection.execute("pragma journal_mode=wal;")
@@ -345,6 +367,7 @@ class ReportManager:
         if type(Content) == Post:
             self.contentmanager.delete_post(Content.id)
             self.commentmanager.delete_post_comments(Content.id)
+            self.ratingmanager.clear_post(Content.id)
         if type(Content) == Comment:
             self.commentmanager.delete_comment(Content)
         with self.make_connection() as connection:

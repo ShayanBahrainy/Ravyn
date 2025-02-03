@@ -19,6 +19,8 @@ body {
 .AuthorName {
     top: 0%;
     margin: 0px;
+    width: fit-content;
+    display: inline;
 }
 .CommentOptions {
     border: none;
@@ -122,13 +124,35 @@ body {
 .backButton:hover {
     color: var(--GreyColor);
 }
-.UpLift {
-    position: absolute;
-    top: 5%;
-    left: 50%;
+.VibeManager {
+    position: relative;
+    top: 80%;
+    left: 45%;
+    margin: 0px;
+    display: inline;
+}
+.VibeScore {
+    top: 0%;
+    display: inline;
+    margin: 0px;
+    color: var(--GreyColor);
 }
 .DownShift {
-    position: absolute;
-    top: 5%;
-    left: 55%;
+    width: fit-content;
+}
+.UpLift {
+    width: fit-content;
+}
+.PostImage {
+    position: relative;
+    left: 40%;
+    width: 10%;
+}
+.UpLift:hover {
+    background-color: var(--GreyColor);
+    color: var(--SideColor);
+}
+.DownShift:hover {
+    background-color: var(--GreyColor);
+    color: var(--SideColor);
 }

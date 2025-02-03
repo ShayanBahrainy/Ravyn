@@ -13,9 +13,9 @@ from DatabaseHandler import DatabaseHandler
 from Notifications import NotificationManager, ViewedManager
 
 
-with open("Client.id") as f:
+with open("Data/Client.id") as f:
     GOOGLE_CLIENT_ID = f.read().strip()
-with open("Client.secret") as f:
+with open("Data/Client.secret") as f:
     GOOGLE_CLIENT_SECRET = f.read().strip()
 DEVELOPMENT = bool(os.environ.get("RAVYN_DEVELOPMENT_MODE"))
 
@@ -28,18 +28,20 @@ def get_google_provider_cfg():
 
 databasehandler = DatabaseHandler()
 
-accounts = Accounts(databasehandler, "Accounts.db", "admin.txt", BETA_ACCOUNTS)
-ratingmanager = RatingManager(databasehandler, "Posts.db", accounts)
-viewmanager = ViewedManager(databasehandler, "Viewed.db")
-contentmanager = ContentManager(databasehandler, "Posts.db", accounts, viewmanager, ratingmanager)
-notificationmanager = NotificationManager(databasehandler, "Notifications.db")
-commentmanager = CommentManager(databasehandler, "Posts.db", contentmanager, notificationmanager)
-reportmanager = ReportManager(databasehandler, "Reports.db", contentmanager, commentmanager)
+accounts = Accounts(databasehandler, "Data/Accounts.db", "Data/admin.txt", BETA_ACCOUNTS)
+ratingmanager = RatingManager(databasehandler, "Data/Posts.db", accounts)
+viewmanager = ViewedManager(databasehandler, "Data/Viewed.db")
+contentmanager = ContentManager(databasehandler, "Data/Posts.db", accounts, viewmanager, ratingmanager)
+notificationmanager = NotificationManager(databasehandler, "Data/Notifications.db")
+commentmanager = CommentManager(databasehandler, "Data/Posts.db", contentmanager, notificationmanager)
+reportmanager = ReportManager(databasehandler, "Data/Reports.db", contentmanager, commentmanager, ratingmanager)
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 app.config["TEMPLATE_AUTO_RELOAD"] = True
+app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
+
 @app.route("/")
 def index():
     if request.cookies.__contains__("AUTH"):
@@ -120,11 +122,14 @@ def newPostPage():
             return redirect("new_post.html",failReason="No body!")
         if not request.form.__contains__("Title"):
             return render_template("new_post.html",failReason="No title!")
-        r = contentmanager.create_post(request.form["Title"], request.form["Body"], user.id)
-        if not r[0]:
-            return render_template("new_post.html", failReason=r[1])
+        image = None
+        if "AttachedImage" in request.files:
+            image = request.files["AttachedImage"]
+        result = contentmanager.create_post(request.form["Title"], request.form["Body"], user.id, image)
+        if not result.success:
+            return render_template("new_post.html", failReason=result.message)
         else:
-            return redirect("/post/" + r[1])
+            return redirect("/post/" + result.message)
 @app.route("/report/<ContentID>", methods=["POST"])
 def report(ContentID):
     if not request.cookies.__contains__("AUTH"):
@@ -240,7 +245,7 @@ def search_index(Query):
     return contentmanager.search(Query, commentmanager)
 
 @app.route("/post/<PostID>/")
-def LoadPaper(PostID):
+def LoadPost(PostID):
     post = contentmanager.get_post(PostID)
     if not post:
         return "Not Found!" 
@@ -257,7 +262,17 @@ def LoadPaper(PostID):
        if user:
            viewmanager.viewed(user, post) 
     return render_template("post_view.html", post=post, PostID=PostID, Comments=Comments, commentSuccess=commentSuccess)
-
+@app.route("/post/<PostID>/image/")
+def serve_image(PostID):
+    post = contentmanager.get_post(PostID)
+    if not post:
+        return "Not Found!" 
+    if not request.cookies.__contains__("AUTH"):
+       return abort(401)
+    user = accounts.is_logged_in(request.cookies["AUTH"])
+    if not user:
+        return abort(403)
+    return send_from_directory("./Data/Images/", PostID + ".webp")
 @app.route("/login/")
 def login():
     google_provider_cfg = get_google_provider_cfg()

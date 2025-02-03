@@ -12,8 +12,11 @@
     <body>
         <div id="PostID" data-post-id="{{post.id}}">
         <p class="Header LargeText">{{post.name}}</p>
-        <!-- <button class="DownShift LargeText Button" id="DownShift">↘</button>
-        <button class="UpLift LargeText Button" id="UpLift">↗</button> -->
+        <div class="VibeManager">
+        <button class="DownShift Button" id="DownShift" data-post-id="{{post.id}}">↘</button>
+        <p class="VibeScore ReallySmallText">Vibe {{post.score}}</p>
+        <button class="UpLift Button" id="UpLift" data-post-id="{{post.id}}">↗</button>
+        </div>
         <p class="Header ReallySmallText AuthorName" id="AuthorName" data-user-id="{{post.authorid}}">By {{post.author.capitalize()}}</p>
         <select title="Extra Options" id="menu" class="controlsButton menuOptions Button">
         <option value="" class="MenuOption" disabled selected>...</option>
@@ -21,6 +24,9 @@
         </select> 
         <button id="backButton" class="backButton LargeText">←</button>
         <p class="Content SmallText"> {{post.content}}</p>
+        {% if post.hasimage %}
+        <img src="/post/{{post.id}}/image/" class="PostImage">
+        {% endif %}
         <div class="CreateComment">
             {% if commentSuccess > 0 %}
             <p class="CreateCommentMessage" id="CreateCommentMessage">

@@ -31,6 +31,36 @@ function submitComment() {
   })
   document.getElementById("NewComment").value = ""
 }
+function handleResult(response) {
+  if (response.ok) {
+      return
+  }
+  if (response.status == 404) {
+      alert('404; Not found!')
+      return
+  }
+  if (409 > response.status && response.status > 400) {
+    alert('Try logging in or making an account :)')
+    return
+  }
+  alert("I'm so sorry an unkown error occurred")
+}
+function addUpLiftandDownShiftButtons() {
+  let UpLift = document.getElementsByClassName("UpLift")
+  let DownShift = document.getElementsByClassName("DownShift")
+  for (let button of UpLift) {
+      button.addEventListener("click", function (ev) {
+          fetch("/post/" + button.dataset.postId + "/uplift/", {method: "POST", credentials:"same-origin"}).then(handleResult)
+          ev.stopPropagation()
+      })
+  }
+  for (let button of DownShift) {
+      button.addEventListener("click", function (ev) {
+          fetch("/post/" + button.dataset.postId + "/downshift/", {method: "POST", credentials:"same-origin"}).then(handleResult)
+          ev.stopPropagation()
+      }) 
+  }
+}
 window.addEventListener("load", function (e) {
   this.document.getElementById("menu").addEventListener("change", function (ev) {
     if (document.getElementById("menu").value == "report") {
@@ -67,4 +97,5 @@ window.addEventListener("load", function (e) {
   authorlink.addEventListener("click", function () {
     location = "/profile/" + authorlink.dataset.userId
   })
+  addUpLiftandDownShiftButtons()
 })

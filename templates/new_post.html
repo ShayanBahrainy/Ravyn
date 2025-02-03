@@ -1,7 +1,7 @@
 <html>
     <head> 
-        <link rel="stylesheet" href="/static/newpost.css">
-        <script src="/static/newpost.js"></script>
+        <link rel="stylesheet" href="/static/new_post.css">
+        <script src="/static/new_post.js"></script>
         <script src="/static/base.js"></script>
         <link rel="shortcut icon" href="/static/icons/favicon.ico">
     </head>
@@ -11,12 +11,14 @@
         {%else%}
         <p class="LargeText Header">Write a post!</p>
         {%endif%}
+        <select class="PostOptions" id="PostOptions"><option selected disabled>...</option><option value="Upload">Upload an image!</option></select>
         <form enctype="multipart/form-data" method="post" class="Form">
             <p class="Title LargeText">Title</p>
             <input type="text" name="Title" class="TitleField" placeholder="(Write Title here!)" minlength="10" maxlength="100">
             <p class="Post LargeText">Post</p>
             <textarea name="Body" class="PostField SmallText" placeholder="(Write post here!)" minlength="100"></textarea>
             <button type="submit" id="Publish" class="PublishButton">Publish</button>
+            <input type="file" id="Image-Upload" class="AttachImage" accept="image/*" name="AttachedImage">
         </form>
     </body>
 </html>
