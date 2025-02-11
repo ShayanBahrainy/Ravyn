@@ -90,10 +90,10 @@ class RatingManager:
 class ContentManager:
     MIN_TITLE_LENGTH = 10
     MAX_TITLE_LENGTH = 100
-    MIN_BODY_LENGTH = 100
+    MIN_BODY_LENGTH = 20
     MAX_FEED_LENGTH = 10
     MAX_SEARCH_RESULTS = 10
-    ProfilePostsLength = 20
+    ProfilePostsLength = 10
     FeedQuery = """
     SELECT * FROM Posts WHERE ID NOT IN ({bindings}) ORDER BY TIME DESC LIMIT ? OFFSET ?;
     """
@@ -140,10 +140,10 @@ class ContentManager:
             offset = math.floor(random.random() * count)
             if count < ContentManager.MAX_SEARCH_RESULTS:
                 offset = 0
-            cursor = connection.execute("SELECT * FROM Posts WHERE BODY like ? OR TITLE like ? LIMIT ? OFFSET ?;",(sqlitequery,sqlitequery,ContentManager.MAX_SEARCH_RESULTS,offset))
+            cursor = connection.execute("SELECT ID, TITLE FROM Posts WHERE BODY like ? OR TITLE like ? LIMIT ? OFFSET ?;",(sqlitequery,sqlitequery,ContentManager.MAX_SEARCH_RESULTS,offset))
             results = cursor.fetchall()
         for result in results:
-            ID, VIEWS, OWNER, BODY, TITLE = result
+            ID, TITLE = result
             SearchResult = {}
             SearchResult["URL"] = "/post/" + ID
             SearchResult["TITLE"] = TITLE
@@ -205,6 +205,8 @@ class ContentManager:
         post.set_score(self.ratingmanager.get_rating(post))
         return post
     def create_post(self, title: str, body: str, user_id: int, image: FileStorage) -> ActionResult:
+        body = body.strip()
+        title = title.strip()
         if len(body) < ContentManager.MIN_BODY_LENGTH:
             return ActionResult(False, "Body too short")
         if len(title) < ContentManager.MIN_TITLE_LENGTH:
