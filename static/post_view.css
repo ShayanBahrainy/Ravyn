@@ -34,10 +34,8 @@ body {
     position: relative;
     left: 30%;
     top: 10%;
-    text-overflow: break-word;
-    width: 40%;
-    word-break: break-all;
-    max-width: 30%;
+    white-space: pre;
+    font-family: Myanmar3;
 }
 .controlsButton {
     background-color: var(--SideColor);

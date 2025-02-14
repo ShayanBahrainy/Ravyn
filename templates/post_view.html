@@ -23,7 +23,7 @@
         <option class="MenuOption" value="report">Report</option>
         </select> 
         <button id="backButton" class="backButton LargeText">←</button>
-        <p class="Content SmallText"> {{post.content}}</p>
+        <pre class="Content SmallText"> {{post.content}}</pre>
         {% if post.hasimage %}
         <img src="/post/{{post.id}}/image/" class="PostImage">
         {% endif %}

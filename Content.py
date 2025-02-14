@@ -243,7 +243,7 @@ class Comment:
         self.postid = postid
 
 class CommentManager:
-    MinimumCommentLength = 10
+    MinimumCommentLength = 5
     MAX_FEED_LENGTH = 100
     MAX_SEARCH_RESULTS = 10
     def __init__(self, dbhandler: DatabaseHandler, db: str, contentmanager: ContentManager, notificationmanager: NotificationManager):
